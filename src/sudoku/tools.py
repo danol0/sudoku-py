@@ -5,8 +5,7 @@ def load_initial_state_to_array(input_file: str) -> np.ndarray:
     """
     @brief Load the initial state of the puzzle from the specified input file.
 
-    @param input_file: Path to file containing the initial state, in the
-        format specified by the instructions.
+    @param input_file: Path to file containing the initial state. Must contain exactly 81 digits.
     @type input_file: str
 
     @return: The initial state of the puzzle as a 9x9 numpy array.
