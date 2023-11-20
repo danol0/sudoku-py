@@ -30,5 +30,7 @@ def load_initial_state_to_array(input_file: str) -> np.ndarray:
         raise
 
     except Exception as e:
-        print(f"Error: An error occurred while loading the initial state file: {str(e)}")
+        print(
+            f"Error: An error occurred while loading the initial state file: {str(e)}"
+        )
         raise

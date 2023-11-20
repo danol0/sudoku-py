@@ -12,7 +12,10 @@ def test_board_initialization():
 def test_board_printing():
     initial_state = np.ones(81, dtype=int).reshape(9, 9)
     board = SudokuBoard(initial_state)
-    assert str(board) == "111|111|111\n111|111|111\n111|111|111\n---+---+---\n111|111|111\n111|111|111\n111|111|111\n---+---+---\n111|111|111\n111|111|111\n111|111|111\n"
+    assert (
+        str(board)
+        == "111|111|111\n111|111|111\n111|111|111\n---+---+---\n111|111|111\n111|111|111\n111|111|111\n---+---+---\n111|111|111\n111|111|111\n111|111|111\n"
+    )
 
 
 def test_board_invalid_initial_state():

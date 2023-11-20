@@ -8,11 +8,21 @@ class SudokuBoard:
 
     def __init__(self, initial_state: np.ndarray) -> None:
         if not isinstance(initial_state, np.ndarray):
-            raise ValueError("Trying to initialize board with an object that is not a numpy array.")
+            raise ValueError(
+                "Trying to initialize board with an object that is not a numpy array."
+            )
         if initial_state.shape != (9, 9):
-            raise ValueError("Trying to initialize board with an array of incorrect shape.")
-        if initial_state.dtype != int or np.any(initial_state < 0) or np.any(initial_state > 9):
-            raise ValueError("Trying to initialize board with an array containing invalid values.")
+            raise ValueError(
+                "Trying to initialize board with an array of incorrect shape."
+            )
+        if (
+            initial_state.dtype != int
+            or np.any(initial_state < 0)
+            or np.any(initial_state > 9)
+        ):
+            raise ValueError(
+                "Trying to initialize board with an array containing invalid values."
+            )
         self.state = initial_state
 
     def __str__(self) -> str:
