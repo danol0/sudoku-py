@@ -3,7 +3,7 @@ import numpy as np
 
 class SudokuBoard:
     """
-    @brief Class representing the state of a sudoku board.
+    @brief Class representing a sudoku board.
     """
 
     def __init__(self, initial_state: np.ndarray) -> None:
@@ -15,25 +15,28 @@ class SudokuBoard:
         possible values for the corresponding cell.
         """
         if not isinstance(initial_state, np.ndarray):
-            raise ValueError("Trying to initialize board with an object that is not a numpy array.")
+            raise ValueError(
+                "Trying to initialize board with an object that is not a numpy array."
+            )
         if initial_state.shape != (9, 9):
-            raise ValueError("Trying to initialize board with an array of incorrect shape.")
-        if initial_state.dtype != int or np.any(initial_state < 0) or np.any(initial_state > 9):
-            raise ValueError("Trying to initialize board with an array containing invalid values.")
+            raise ValueError(
+                "Trying to initialize board with an array of incorrect shape."
+            )
+        if (
+            initial_state.dtype != int
+            or np.any(initial_state < 0)
+            or np.any(initial_state > 9)
+        ):
+            raise ValueError(
+                "Trying to initialize board with an array containing invalid values."
+            )
+
+        # TODO: Check that the initial state is valid.
 
         self.state = initial_state
-        self.possible_values = self.initialise_possible_values(self.state)
-
-    def initialise_possible_values(self, state: np.ndarray) -> np.ndarray:
-        """
-        @brief Initializes the possible values for each cell in the board given the initial state.
-        """
-        possible_values = np.array([set(range(1, 10)) for _ in range(81)]).reshape(9, 9)
-        for row in range(9):
-            for col in range(9):
-                if state[row, col] != 0:
-                    possible_values[row, col] = set([state[row, col]])
-        return possible_values
+        self.possible_values = np.array([set(range(1, 10)) for _ in range(81)]).reshape(
+            9, 9
+        )
 
     def __str__(self) -> str:
         """
@@ -50,80 +53,62 @@ class SudokuBoard:
             output += "\n"
         return output
 
-    def get_row(self, row: int) -> np.ndarray:
-        """
-        @brief Returns the row at the specified index.
-        """
-        return self.state[row, :]
-
-    def get_col(self, col: int) -> np.ndarray:
-        """
-        @brief Returns the column at the specified index.
-        """
-        return self.state[:, col]
-
-    def get_box(self, box: tuple) -> np.ndarray:
-        """
-        @brief Returns the box that the specified index belongs to.
-        """
-        row, col = box
-        # find the index of the top-left cell of the box
-        row = row - row % 3
-        col = col - col % 3
-        return self.state[row:(row + 3), col:(col + 3)].flatten()
-
-    def related_cells(self, cell: tuple) -> np.ndarray:
-        """
-        @brief Returns all cells that are related to the specified cell.
-        """
-        row, col = cell
-        return np.concatenate((self.get_row(row), self.get_col(col), self.get_box((row, col))))
-
-    def update_possible_values(self) -> None:
+    def update_possible_values(
+        self, state: np.ndarray, possible_values: np.ndarray
+    ) -> None:
         """
         @brief Updates the possible values given the current state of the board.
         """
         for i in range(9):
             for j in range(9):
-                if self.state[i, j] == 0:
-                    self.possible_values[i, j] -= set(self.related_cells((i, j)))
+                if state[i, j] == 0:
+                    possible_values[i, j] -= set(self.related_cells(state, (i, j)))
+                if state[i, j] != 0:
+                    possible_values[i, j] = set()
+        return possible_values
 
-    def apply_pencil_mark_constraint(self) -> bool:
+    def propigate_constraints(self) -> bool:
         """
-        @brief Updates the state of the board for cells with only one possible value.
+        @brief Iteratively updates the state of the board for cells with only one possible value.
         """
-        state_updated = False
-        for i in range(9):
-            for j in range(9):
-                if len(self.possible_values[i, j]) == 1:
-                    self.state[i, j] = self.possible_values[i, j].pop()
-                    state_updated = True
-        return state_updated
+        state_updated = True
+        while state_updated:
+            if np.all(self.state != 0):
+                return True
 
-    def propigate_constraints(self) -> None:
+            self.possible_values = self.update_possible_values(
+                self.state, self.possible_values
+            )
+            state_updated = False
+
+            for i in range(9):
+                for j in range(9):
+                    if len(self.possible_values[i, j]) == 1:
+                        self.state[i, j] = self.possible_values[i, j].pop()
+                        state_updated = True
+        return False
+
+    def related_cells(self, grid: np.ndarray, index: tuple) -> np.ndarray:
         """
-        @brief Recursively applies the constraints until no updates are made or the board is solved.
+        @brief Returns the contents of all cells that are related to the specified index.
         """
-        self.update_possible_values()
-
-        if np.all(self.state != 0):
-            print("The puzzle has been solved.")
-            return True
-
-        if self.apply_pencil_mark_constraint() is False:
-            print("It was not possible to solve the puzzle using constraint propigation.")
-            return False
-
-        else:
-            self.propigate_constraints()
-
-# TODO: will update this function to implement backtracking
+        row, col = index
+        # find the index of the top-left cell of the box
+        b_row, b_col = row - row % 3, col - col % 3
+        related = (
+            grid[row, :],
+            grid[:, col],
+            grid[b_row : (b_row + 3), b_col : (b_col + 3)].flatten(),
+        )
+        return np.concatenate(related)
 
     def solve(self) -> None:
         """
         @brief Attempts to solve the board by applying constraint propigation.
         """
         if self.propigate_constraints():
+            print("The board was solved by constraint propigation.")
             return True
         else:
+            print("The board could not be solved by constraint propigation.")
             return False
