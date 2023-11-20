@@ -32,25 +32,11 @@ class SudokuBoard:
             )
 
         # TODO: Check that the initial state is valid.
-            raise ValueError(
-                "Trying to initialize board with an array of incorrect shape."
-            )
-        if (
-            initial_state.dtype != int
-            or np.any(initial_state < 0)
-            or np.any(initial_state > 9)
-        ):
-            raise ValueError(
-                "Trying to initialize board with an array containing invalid values."
-            )
-
-        # TODO: Check that the initial state is valid.
 
         self.state = initial_state
-        self.possible_values = np.array([set(range(1, 10)) for _ in range(81)]).reshape(
-            9, 9
-        )
-        self.possible_values = self.update_possible_values()
+        p_vals = np.array([set(range(1, 10)) for _ in range(81)])
+        self.possible_values = p_vals.reshape(9, 9)
+        self.update_possible_values()
 
     def __str__(self) -> str:
         """
@@ -79,7 +65,6 @@ class SudokuBoard:
                     )
                 if self.state[i, j] != 0:
                     self.possible_values[i, j] = set()
-        return self.possible_values
 
     def propigate_constraints(self) -> bool:
         """
@@ -90,9 +75,7 @@ class SudokuBoard:
             if np.all(self.state != 0):
                 return True
 
-            self.possible_values = self.update_possible_values(
-                self.state, self.possible_values
-            )
+            self.update_possible_values()
             state_updated = False
 
             for i in range(9):
@@ -105,17 +88,7 @@ class SudokuBoard:
     def related_cells(self, grid: np.ndarray, index: tuple) -> np.ndarray:
         """
         @brief Returns the contents of all cells that are related to the specified index.
-        @brief Returns the contents of all cells that are related to the specified index.
         """
-        row, col = index
-        # find the index of the top-left cell of the box
-        b_row, b_col = row - row % 3, col - col % 3
-        related = (
-            grid[row, :],
-            grid[:, col],
-            grid[b_row : (b_row + 3), b_col : (b_col + 3)].flatten(),
-        )
-        return np.concatenate(related)
         row, col = index
         # find the index of the top-left cell of the box
         b_row, b_col = row - row % 3, col - col % 3
@@ -132,9 +105,7 @@ class SudokuBoard:
         """
         if self.propigate_constraints():
             print("The board was solved by constraint propigation.")
-            print("The board was solved by constraint propigation.")
             return True
         else:
-            print("The board could not be solved by constraint propigation.")
             print("The board could not be solved by constraint propigation.")
             return False
