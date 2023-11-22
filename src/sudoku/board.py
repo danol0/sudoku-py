@@ -10,7 +10,7 @@ class SudokuBoard:
         """
         @brief Initializes the board with the specified initial state.
 
-        The state of the board is sored as a 9x9 numpy array, where each cell contains the value of the cell.
+        The state of the board is stored as a 9x9 numpy array, where each cell contains the value of the cell.
         The possible values for each cell are stored in a 9x9 numpy array of sets, where each set contains the
         possible values for the corresponding cell.
         """
@@ -22,20 +22,15 @@ class SudokuBoard:
             raise ValueError(
                 "Trying to initialize board with an array of incorrect shape."
             )
-        if (
-            initial_state.dtype != int
-            or np.any(initial_state < 0)
-            or np.any(initial_state > 9)
-        ):
+        if np.logical_or(initial_state < 0, initial_state > 9).any():
             raise ValueError(
                 "Trying to initialize board with an array containing invalid values."
             )
 
-        # TODO: Check that the initial state is valid.
-
         self.state = initial_state
-        p_vals = np.array([set(range(1, 10)) for _ in range(81)])
-        self.possible_values = p_vals.reshape(9, 9)
+        self.possible_values = np.array([set(range(1, 10)) for _ in range(81)]).reshape(
+            9, 9
+        )
         self.update_possible_values()
 
     def __str__(self) -> str:
@@ -66,7 +61,7 @@ class SudokuBoard:
                 if self.state[i, j] != 0:
                     self.possible_values[i, j] = set()
 
-    def propigate_constraints(self) -> bool:
+    def propagate_constraints(self) -> bool:
         """
         @brief Iteratively updates the state of the board for cells with only one possible value.
         """
@@ -103,7 +98,7 @@ class SudokuBoard:
         """
         @brief Attempts to solve the board by applying constraint propigation.
         """
-        if self.propigate_constraints():
+        if self.propagate_constraints():
             print("The board was solved by constraint propigation.")
             return True
         else:
