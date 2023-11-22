@@ -1,5 +1,7 @@
 report/*
 *.txt
+!requirements.txt
 *.ipynb
 __pycache__/
 !report/report.tex
+*md
