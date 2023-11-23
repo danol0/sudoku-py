@@ -27,6 +27,7 @@ class SudokuBoard:
                 "Trying to initialize board with an array containing invalid values."
             )
 
+        self.indices = [(i, j) for i in range(9) for j in range(9)]
         self.state = initial_state
         self.possible_values = np.array([set(range(1, 10)) for _ in range(81)]).reshape(
             9, 9
@@ -50,39 +51,35 @@ class SudokuBoard:
 
     def update_possible_values(self) -> None:
         """
-        @brief Updates the possible values given the current state of the board.
+        @brief Updates the matrix of possible values given the current state of the board.
         """
-        for i in range(9):
-            for j in range(9):
-                if self.state[i, j] == 0:
-                    self.possible_values[i, j] -= set(
-                        self.related_cells(self.state, (i, j))
-                    )
-                if self.state[i, j] != 0:
-                    self.possible_values[i, j] = set()
+        for index in self.indices:
+            if self.state[index] == 0:
+                self.possible_values[index] -= set(
+                    self.related_cells(self.state, (index))
+                )
+            if self.state[index] != 0:
+                self.possible_values[index] = set()
 
     def propagate_constraints(self) -> bool:
         """
-        @brief Iteratively updates the state of the board for cells with only one possible value.
+        @brief Recursively updates the state of the board for cells with only one possible value.
         """
-        state_updated = True
-        while state_updated:
-            if np.all(self.state != 0):
-                return True
+        if np.all(self.state != 0):
+            return True
 
-            self.update_possible_values()
-            state_updated = False
+        self.update_possible_values()
 
-            for i in range(9):
-                for j in range(9):
-                    if len(self.possible_values[i, j]) == 1:
-                        self.state[i, j] = self.possible_values[i, j].pop()
-                        state_updated = True
+        for index in self.indices:
+            if len(self.possible_values[index]) == 1:
+                self.state[index] = self.possible_values[index].pop()
+                return self.propagate_constraints()
+
         return False
 
     def related_cells(self, grid: np.ndarray, index: tuple) -> np.ndarray:
         """
-        @brief Returns the contents of all cells that are related to the specified index.
+        @brief Returns the contents of all cells in the given grid that are related to the specified index.
         """
         row, col = index
         # find the index of the top-left cell of the box
@@ -102,5 +99,5 @@ class SudokuBoard:
             print("The board was solved by constraint propigation.")
             return True
         else:
-            print("The board could not be solved by constraint propigation.")
+            print("It was not possible to solve the puzzle.")
             return False
