@@ -58,19 +58,20 @@ class SudokuBoard:
                 self.possible_values[index] -= set(
                     self.related_cells(self.state, (index))
                 )
-            if self.state[index] != 0:
-                self.possible_values[index] = set()
 
     def propagate_constraints(self) -> bool:
         """
         @brief Recursively updates the state of the board for cells with only one possible value.
         """
+        # if board is full, return
         if np.all(self.state != 0):
             return True
 
+        # update possible values for the current state
         self.update_possible_values()
 
         for index in self.indices:
+            # if cell has only one possible value, assign it and propagate
             if len(self.possible_values[index]) == 1:
                 self.state[index] = self.possible_values[index].pop()
                 return self.propagate_constraints()
@@ -93,11 +94,42 @@ class SudokuBoard:
 
     def solve(self) -> None:
         """
-        @brief Attempts to solve the board by applying constraint propigation.
+        @brief Attempts to solve the board by applying constraint propigation, and then backtracking.
         """
         if self.propagate_constraints():
             print("The board was solved by constraint propigation.")
             return True
+        elif self.backtrack(self.state):
+            print("The board was solved through brute force.")
+            return True
         else:
             print("It was not possible to solve the puzzle.")
             return False
+
+    def backtrack(self, grid: np.ndarray) -> bool:
+        """
+        @brief Recursive, depth first search on the given board state.
+        """
+        # if board is full, return
+        if np.all(grid != 0):
+            self.state = grid
+            return True
+
+        # find next empty cell
+        index = np.where(grid == 0)[0][0], np.where(grid == 0)[1][0]
+
+        # try each possible value
+        for value in self.possible_values[index]:
+
+            # if valid, assign the value
+            if value not in self.related_cells(grid, (index)):
+                grid[index] = value
+
+                # repeat search with the new grid
+                if self.backtrack(grid):
+                    return True
+
+            # if no valid value, backtrack
+            grid[index] = 0
+
+        return False
