@@ -47,5 +47,27 @@ def test_board_constraint():
     board = SudokuBoard(initial_state)
     assert board.possible_values[3, 7] == {7}
     assert board.possible_values[8, 8] == {2}
-    assert board.possible_values[0, 0] == {} or {4}  # depends on implimentation
-    assert board.solve()
+    assert board.possible_values[0, 0] == {} or {4}  # TODO: depends on implimentation
+    solved = board.propagate_constraints()  # should solve the board
+    assert solved
+
+
+def test_board_backtrack():
+    initial_state = np.array(
+        [
+            [0, 0, 0, 0, 0, 7, 0, 0, 0],
+            [0, 0, 0, 0, 0, 9, 5, 0, 4],
+            [0, 0, 0, 0, 5, 0, 1, 6, 9],
+            [0, 8, 0, 0, 0, 0, 3, 0, 5],
+            [0, 7, 5, 0, 0, 0, 2, 9, 0],
+            [4, 0, 6, 0, 0, 0, 0, 8, 0],
+            [7, 6, 2, 0, 8, 0, 0, 0, 0],
+            [1, 0, 3, 9, 0, 0, 0, 0, 0],
+            [0, 0, 0, 6, 0, 0, 0, 0, 0],
+        ]
+    )
+    board = SudokuBoard(initial_state)
+    constraints_solve = board.propagate_constraints()
+    assert not constraints_solve
+    solved = board.solve()
+    assert solved
