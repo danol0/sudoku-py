@@ -3,14 +3,14 @@ import numpy as np
 # TODO: Loading the entire file at once is best practice
 
 
-def load_initial_state(input_file: str) -> np.ndarray:
+def load_initial_state_file(input_file: str) -> np.ndarray:
     """
     @brief Load the initial state of the puzzle from the specified input file.
 
     The function attempts to be robust to a range of input formats. It looks only for numbers and full stops
     (which are treated as zeros/empty cells) in the input file, discarding all other characters. It then
     checks that the extracted board is of the correct size (9x9) and raises an error if not. This allows
-    a range of typical board formats to be used.
+    a range of typical board encodings to be used.
 
     @param input_file: Path to file containing the initial state. Must contain exactly 81 digits & dots.
     @type input_file: str
@@ -32,7 +32,7 @@ def load_initial_state(input_file: str) -> np.ndarray:
         # Check that the extracted board is of the correct size
         if len(numbers) != 81:
             raise ValueError(
-                "There are too many or too few digits in the input file: must be exactly 81."
+                "Please check the input file: must contain exactly 81 digits & full stops."
             )
 
         return np.array(numbers).reshape((9, 9))
