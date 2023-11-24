@@ -1,0 +1,7 @@
+services:
+  application:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: sudoku-solver
+    container_name: sudoku-solver
