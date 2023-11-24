@@ -8,9 +8,8 @@ def load_initial_state_file(input_file: str) -> np.ndarray:
     @brief Load the initial state of the puzzle from the specified input file.
 
     The function attempts to be robust to a range of input formats. It looks only for numbers and full stops
-    (which are treated as zeros/empty cells) in the input file, discarding all other characters. It then
-    checks that the extracted board is of the correct size (9x9) and raises an error if not. This allows
-    a range of typical board encodings to be used.
+    (which are treated as zeros/empty cells) in the input file, discarding all other characters. As such any
+    file containing exactly 81 digits/dots is acceptable, allowing a range of board encodings to be used.
 
     @param input_file: Path to file containing the initial state. Must contain exactly 81 digits & dots.
     @type input_file: str
