@@ -10,9 +10,11 @@ class SudokuBoard:
         """
         @brief Initializes the board with the specified initial state.
 
-        The state of the board is stored as a 9x9 numpy array, where each cell contains the value of the cell.
-        The possible values for each cell are stored in a 9x9 numpy array of sets, where each set contains the
-        possible values for the corresponding cell.
+        The state of the board is stored as a 9x9 numpy array.
+        The possible values for each cell are stored in a 9x9 numpy array of sets.
+
+        @param initial_state: The initial state of the board.
+        @type initial_state: numpy.ndarray
         """
         if not isinstance(initial_state, np.ndarray):
             raise ValueError(
@@ -27,6 +29,7 @@ class SudokuBoard:
                 "Trying to initialize board with an array containing invalid values."
             )
 
+        # TODO: check that the initial state is valid
         self.indices = [(i, j) for i in range(9) for j in range(9)]
         self.state = initial_state
         self.possible_values = np.array([set(range(1, 10)) for _ in range(81)]).reshape(
@@ -76,6 +79,7 @@ class SudokuBoard:
                 self.state[index] = self.possible_values[index].pop()
                 return self.propagate_constraints()
 
+        # return False once propagation is complete
         return False
 
     def related_cells(self, grid: np.ndarray, index: tuple) -> np.ndarray:
@@ -129,7 +133,8 @@ class SudokuBoard:
                 if self.backtrack(grid):
                     return True
 
-            # if no valid value, backtrack
+            # if no valid value, reset the cell and try the next value
             grid[index] = 0
 
+        # return False when branch is exhausted
         return False
