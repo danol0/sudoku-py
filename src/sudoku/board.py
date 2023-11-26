@@ -1,20 +1,31 @@
 import numpy as np
+import time
 
 
 class SudokuBoard:
     """
-    @brief Class representing a sudoku board.
+    Class representing a Sudoku board.
+
+    Attributes:
+        state (numpy.ndarray): The current state of the board.
+
+        possible_values (numpy.ndarray): The possible values for each cell, stored as an array of sets.
+
+        indices (list[tuple[int, int]]): The indices of each cell on the board.
+
+    Args:
+        initial_state (numpy.ndarray): The initial state of the board.
+
+    Raises:
+        ValueError: If the initial state is not a 9x9 numpy array or contains invalid values.
+
+    Returns:
+        SudokuBoard: A new SudokuBoard object.
     """
 
     def __init__(self, initial_state: np.ndarray) -> None:
         """
-        @brief Initializes the board with the specified initial state.
-
-        The state of the board is stored as a 9x9 numpy array.
-        The possible values for each cell are stored in a 9x9 numpy array of sets.
-
-        @param initial_state: The initial state of the board.
-        @type initial_state: numpy.ndarray
+        Initializes the board with the specified initial state.
         """
         if not isinstance(initial_state, np.ndarray):
             raise ValueError(
@@ -39,7 +50,10 @@ class SudokuBoard:
 
     def __str__(self) -> str:
         """
-        @brief Prints the board state in the format specified by the instructions.
+        Prints the board state in a readble format.
+
+        Returns:
+            str: A string representation of the board state.
         """
         output = ""
         for row in range(9):
@@ -54,7 +68,7 @@ class SudokuBoard:
 
     def update_possible_values(self) -> None:
         """
-        @brief Updates the matrix of possible values given the current state of the board.
+        Updates the possible values given the current state of the board.
         """
         for index in self.indices:
             if self.state[index] == 0:
@@ -64,7 +78,10 @@ class SudokuBoard:
 
     def propagate_constraints(self) -> bool:
         """
-        @brief Recursively updates the state of the board for cells with only one possible value.
+        Assigns numbers to cells with only one possible value and propagates.
+
+        Returns:
+            bool: True if the board is solved, False otherwise.
         """
         # if board is full, return
         if np.all(self.state != 0):
@@ -84,7 +101,18 @@ class SudokuBoard:
 
     def related_cells(self, grid: np.ndarray, index: tuple) -> np.ndarray:
         """
-        @brief Returns the contents of all cells in the given grid that are related to the specified index.
+        Returns the contents of all cells in the given grid that are related to the specified index.
+
+        Note:
+            Related cells are those in the same row, column, or box as the given cell.
+            The returned array includes the contents of the given cell.
+
+        Args:
+            grid (numpy.ndarray): The grid to search.
+            index (tuple): The index of the cell to find related cells for.
+
+        Returns:
+            numpy.ndarray: A 1D array containing the contents of all related cells.
         """
         row, col = index
         # find the index of the top-left cell of the box
@@ -96,23 +124,41 @@ class SudokuBoard:
         )
         return np.concatenate(related)
 
-    def solve(self) -> None:
+    def solve(self) -> bool:
         """
-        @brief Attempts to solve the board by applying constraint propigation, and then backtracking.
+        Attempts to solve the board by applying constraint propagation and then backtracking.
+
+        Returns:
+            bool: True if the board was solved, False otherwise.
         """
+        start = time.time()
         if self.propagate_constraints():
-            print("The board was solved by constraint propigation.")
+            end = time.time()
+            print(
+                f"The board was solved by constraint propagation in {end - start:.3} seconds."
+            )
             return True
         elif self.backtrack(self.state):
-            print("The board was solved through brute force.")
+            end = time.time()
+            print(f"The board was solved by brute force in {end - start:.3} seconds")
             return True
         else:
-            print("It was not possible to solve the puzzle.")
+            end = time.time()
+            print(f"No solutions exist. Search took {end - start:.3} seconds.")
             return False
 
     def backtrack(self, grid: np.ndarray) -> bool:
         """
-        @brief Recursive, depth first search on the given board state.
+        Recursive, depth-first search on the given board state.
+
+        Note:
+            If a solution is found, the state of the SudokuBoard object is updated to the solved board.
+
+        Args:
+            grid (numpy.ndarray): The board state to search.
+
+        Returns:
+            bool: True if a solution was found, False otherwise.
         """
         # if board is full, return
         if np.all(grid != 0):
@@ -124,7 +170,6 @@ class SudokuBoard:
 
         # try each possible value
         for value in self.possible_values[index]:
-
             # if valid, assign the value
             if value not in self.related_cells(grid, (index)):
                 grid[index] = value

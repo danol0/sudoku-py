@@ -1,23 +1,20 @@
 import numpy as np
 
-# TODO: Loading the entire file at once is best practice
-
 
 def load_initial_state_file(input_file: str) -> np.ndarray:
     """
-    @brief Load the initial state of the puzzle from the specified input file.
+    Load the initial state of the puzzle from the specified input file, allowing for a range of input formats.
 
-    The function attempts to be robust to a range of input formats. It looks only for numbers and full stops
-    (which are treated as zeros/empty cells) in the input file, discarding all other characters. As such any
-    file containing exactly 81 digits/dots is acceptable, allowing a range of board encodings to be used.
+    Parameters:
+        input_file (str): Path to file containing the initial state. Must contain exactly 81 digits & dots.
 
-    @param input_file: Path to file containing the initial state. Must contain exactly 81 digits & dots.
-    @type input_file: str
+    Returns:
+        numpy.ndarray: The initial state of the board as a 9x9 numpy array, with zeros representing empty cells.
 
-    @return: The initial state of the puzzle as a 9x9 numpy array, with zeros representing empty cells.
-    @rtype: numpy.ndarray
+    Raises:
+        FileNotFoundError: If the input file is not found.
+        ValueError: If the input file does not contain exactly 81 digits & dots.
     """
-
     try:
         with open(input_file, "r") as file:
             # Extract all digits and dots from the file & replace dots with zeros

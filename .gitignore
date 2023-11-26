@@ -9,3 +9,4 @@ __pycache__/
 !README.md
 *lprof
 *.DS_Store
+docs/build/
