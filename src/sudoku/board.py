@@ -72,9 +72,7 @@ class SudokuBoard:
         """
         for index in self.indices:
             if self.state[index] == 0:
-                self.possible_values[index] -= set(
-                    self.related_cells(self.state, (index))
-                )
+                self.possible_values[index] -= self.related_cells(self.state, (index))
 
                 # if no possible values, the board is invalid
                 if self.possible_values[index] == set():
@@ -103,30 +101,33 @@ class SudokuBoard:
         # return False once propagation is complete
         return False
 
-    def related_cells(self, grid: np.ndarray, index: tuple) -> np.ndarray:
+    def related_cells(self, grid: np.ndarray, index: tuple) -> set:
         """
         Returns the contents of all cells in the given grid that are related to the specified index.
 
         Note:
             Related cells are those in the same row, column, or box as the given cell.
-            The returned array includes the contents of the given cell.
+            The returned set includes the contents of the given cell.
 
         Args:
             grid (numpy.ndarray): The grid to search.
             index (tuple): The index of the cell to find related cells for.
 
         Returns:
-            numpy.ndarray: A 1D array containing the contents of all related cells.
+            set: A set containing the contents of all related cells.
         """
         row, col = index
-        # find the index of the top-left cell of the box
-        b_row, b_col = row - row % 3, col - col % 3
-        related = (
-            grid[row, :],
-            grid[:, col],
-            grid[b_row : (b_row + 3), b_col : (b_col + 3)].flatten(),
+        # calculate box indices
+        box_row = row // 3 * 3
+        box_col = col // 3 * 3
+        related = np.concatenate(
+            (
+                grid[row, :],
+                grid[:, col],
+                grid[box_row : box_row + 3, box_col : box_col + 3].flatten(),
+            )
         )
-        return np.concatenate(related)
+        return set(related)
 
     def solve(self) -> bool:
         """
