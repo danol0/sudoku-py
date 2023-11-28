@@ -67,7 +67,5 @@ def test_board_backtrack():
         ]
     )
     board = SudokuBoard(initial_state)
-    constraints_solve = board.propagate_constraints()
-    assert not constraints_solve
-    solved = board.solve()
-    assert solved
+    assert not board.propagate_constraints()  # not solvable through constraints alone
+    assert board.solve()  # thus backtracking is required

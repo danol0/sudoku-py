@@ -3,8 +3,9 @@ import numpy as np
 import src.sudoku.tools as st
 
 
+# using pytest fixtures to simulate input files
 @pytest.fixture
-def initial_state(tmp_path):
+def valid_initial_state(tmp_path):
     # simulate an input file
     state_data = "85...24..72......9..4....invalid.....1.7..23.5...9...4...characters........8..7..17..........36.4."
     file_path = tmp_path / "initial_state.txt"
@@ -21,16 +22,16 @@ def invalid_initial_state(tmp_path):
     return str(file_path)
 
 
-def test_load_initial_state_shape(initial_state):
-    assert st.load_initial_state_file(initial_state).shape == (9, 9)
+def test_load_initial_state_shape(valid_initial_state):
+    assert st.load_initial_state_file(valid_initial_state).shape == (9, 9)
 
 
-def test_load_initial_state_dtype(initial_state):
-    assert st.load_initial_state_file(initial_state).dtype == np.int64
+def test_load_initial_state_dtype(valid_initial_state):
+    assert st.load_initial_state_file(valid_initial_state).dtype == np.int64
 
 
-def test_load_initial_state_values(initial_state):
-    initial_state_array = st.load_initial_state_file(initial_state)
+def test_load_initial_state_values(valid_initial_state):
+    initial_state_array = st.load_initial_state_file(valid_initial_state)
     assert np.all(initial_state_array >= 0)
     assert np.all(initial_state_array <= 9)
     assert initial_state_array[0][0] == 8

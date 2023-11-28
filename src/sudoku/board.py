@@ -1,5 +1,6 @@
 import numpy as np
 import time
+import warnings
 
 
 class SudokuBoard:
@@ -40,12 +41,16 @@ class SudokuBoard:
                 "Trying to initialize board with an array containing invalid values."
             )
 
-        # TODO: check that the initial state is valid
         self.indices = [(i, j) for i in range(9) for j in range(9)]
         self.state = initial_state
-        self.possible_values = np.array([set(range(1, 10)) for _ in range(81)]).reshape(
-            9, 9
-        )
+
+        if np.count_nonzero(self.state) < 17:
+            warnings.warn(
+                "WARNING: The puzzle has less than the minimum clues required for a unique solution. Solving regardless..."
+            )
+
+        possible_values = np.array([set(range(1, 10)) for _ in range(81)])
+        self.possible_values = possible_values.reshape(9, 9)
         self.update_possible_values()
 
     def __str__(self) -> str:
@@ -76,7 +81,7 @@ class SudokuBoard:
 
                 # if no possible values, the board is invalid
                 if self.possible_values[index] == set():
-                    raise ValueError("The board is invalid.")
+                    raise ValueError("No solutions exist for this puzzle.")
 
     def propagate_constraints(self) -> bool:
         """
@@ -135,22 +140,26 @@ class SudokuBoard:
 
         Returns:
             bool: True if the board was solved, False otherwise.
+
+        Raises:
+            ValueError: If no solutions exist for the puzzle.
         """
         start = time.time()
         if self.propagate_constraints():
             end = time.time()
             print(
-                f"The board was solved by constraint propagation in {end - start:.3} seconds."
+                f"The puzzle was solved by constraint propagation in {end - start:.3} seconds."
             )
             return True
         elif self.backtrack(self.state):
             end = time.time()
-            print(f"The board was solved by brute force in {end - start:.3} seconds")
+            print(f"The puzzle was solved by brute force in {end - start:.3} seconds")
             return True
         else:
             end = time.time()
-            print(f"No solutions exist. Search took {end - start:.3} seconds.")
-            return False
+            raise ValueError(
+                f"No solutions exist for this puzzle. Search took {end - start:.3} seconds."
+            )
 
     def backtrack(self, grid: np.ndarray) -> bool:
         """
