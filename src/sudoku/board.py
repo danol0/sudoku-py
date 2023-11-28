@@ -76,6 +76,10 @@ class SudokuBoard:
                     self.related_cells(self.state, (index))
                 )
 
+                # if no possible values, the board is invalid
+                if self.possible_values[index] == set():
+                    raise ValueError("The board is invalid.")
+
     def propagate_constraints(self) -> bool:
         """
         Assigns numbers to cells with only one possible value and propagates.
