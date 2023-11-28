@@ -1,19 +1,19 @@
 FROM python:3
 
-# Change to use your own input file
+# Change to use your own input file, which will be copied across
 ENV INPUT_FILE=input.txt
 
 # Cannot clone private gitlab repo without setting up access key as a secret
 # For simplicity, will copy files locally instead
 # ENV GIT_REPO_URL=https://github.com/your-github-repo.git
 
-WORKDIR /app
+RUN mkdir app
 
 COPY requirements.txt app
 COPY src app/src
-COPY $INPUT_FILE app
+COPY $INPUT_FILE app/input.txt
 
-
+WORKDIR /app
 RUN pip install -r requirements.txt
 
-CMD python src/main.py $INPUT_FILE
+CMD python src/main.py input.txt
