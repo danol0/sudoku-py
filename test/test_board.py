@@ -3,21 +3,6 @@ from src.sudoku.board import SudokuBoard
 import pytest
 
 
-def test_board_initialization():
-    initial_state = np.ones(81, dtype=int).reshape(9, 9)
-    board = SudokuBoard(initial_state)
-    assert np.array_equal(board.state, initial_state)
-
-
-def test_board_printing():
-    initial_state = np.ones(81, dtype=int).reshape(9, 9)
-    board = SudokuBoard(initial_state)
-    assert (
-        str(board)
-        == "111|111|111\n111|111|111\n111|111|111\n---+---+---\n111|111|111\n111|111|111\n111|111|111\n---+---+---\n111|111|111\n111|111|111\n111|111|111\n"
-    )
-
-
 def test_board_invalid_initial_state():
     wrong_shape = np.ones(80, dtype=int).reshape(8, 10)
     wrong_type = np.linspace(1, 80, 81, dtype=float).reshape(9, 9)
@@ -28,6 +13,31 @@ def test_board_invalid_initial_state():
         SudokuBoard(wrong_type)
     with pytest.raises(ValueError):
         SudokuBoard(double_digit)
+
+
+# check that the board is initialized as an array
+def test_board_initialization():
+    initial_state = np.ones(81, dtype=int).reshape(9, 9)
+    board = SudokuBoard(initial_state)
+    assert np.array_equal(board.state, initial_state)
+
+
+def test_board_printing():
+    initial_state = np.ones(81, dtype=int).reshape(9, 9)
+    board = SudokuBoard(initial_state)
+    assert (
+        str(board) == "111|111|111\n"
+        "111|111|111\n"
+        "111|111|111\n"
+        "---+---+---\n"
+        "111|111|111\n"
+        "111|111|111\n"
+        "111|111|111\n"
+        "---+---+---\n"
+        "111|111|111\n"
+        "111|111|111\n"
+        "111|111|111\n"
+    )
 
 
 def test_board_constraint():
@@ -67,7 +77,5 @@ def test_board_backtrack():
         ]
     )
     board = SudokuBoard(initial_state)
-    constraints_solve = board.propagate_constraints()
-    assert not constraints_solve
-    solved = board.solve()
-    assert solved
+    assert not board.propagate_constraints()  # not solvable through constraints alone
+    assert board.solve()  # thus backtracking is required
