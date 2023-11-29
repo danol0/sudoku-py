@@ -35,6 +35,7 @@ invalid_box = (
 invalid_row = (
     "9..1....4.14.3.8....3....9....7.8..18....3..........3..21....7...9.4.5..5...16..3"
 )
+
 invalid_puzzles = [
     box_duplicate,
     column_duplicate,

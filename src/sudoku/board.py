@@ -26,8 +26,9 @@ class SudokuBoard:
 
     def __init__(self, initial_state: np.ndarray) -> None:
         """
-        Initializes the board with the specified initial state.
+        Initializes the board object from the specified initial state.
         """
+        # check that the initial state is valid
         if not isinstance(initial_state, np.ndarray):
             raise ValueError(
                 "Trying to initialize board with an object that is not a numpy array."
@@ -139,22 +140,25 @@ class SudokuBoard:
         Attempts to solve the board by applying constraint propagation and then backtracking.
 
         Returns:
-            bool: True if the board was solved, False otherwise.
+            bool: True if the board was solved, False if no solutions exist.
 
         Raises:
             ValueError: If no solutions exist for the puzzle.
         """
         start = time.time()
+
         if self.propagate_constraints():
             end = time.time()
             print(
                 f"The puzzle was solved by constraint propagation in {end - start:.3} seconds."
             )
             return True
+
         elif self.backtrack(self.state):
             end = time.time()
             print(f"The puzzle was solved by brute force in {end - start:.3} seconds")
             return True
+
         else:
             end = time.time()
             raise ValueError(
@@ -184,6 +188,7 @@ class SudokuBoard:
 
         # try each possible value
         for value in self.possible_values[index]:
+
             # if valid, assign the value
             if value not in self.related_cells(grid, (index)):
                 grid[index] = value
