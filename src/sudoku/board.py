@@ -47,7 +47,7 @@ class SudokuBoard:
 
         if np.count_nonzero(self.state) < 17:
             warnings.warn(
-                "WARNING: The puzzle has less than the minimum clues required for a unique solution. Solving regardless..."
+                "WARNING: The puzzle has less than the minimum clues required for a unique solution."
             )
 
         possible_values = np.array([set(range(1, 10)) for _ in range(81)])
@@ -92,7 +92,7 @@ class SudokuBoard:
             bool: True if the board is solved, False otherwise.
         """
         # if board is full, return
-        if np.all(self.state != 0):
+        if np.all(self.state):
             return True
 
         # update possible values for the current state
@@ -126,14 +126,14 @@ class SudokuBoard:
         # calculate box indices
         box_row = row // 3 * 3
         box_col = col // 3 * 3
-        related = np.concatenate(
-            (
-                grid[row, :],
-                grid[:, col],
-                grid[box_row : box_row + 3, box_col : box_col + 3].flatten(),
-            )
-        )
-        return set(related)
+
+        related = {
+            *grid[row, :],
+            *grid[:, col],
+            *grid[box_row : box_row + 3, box_col : box_col + 3].flatten(),
+        }
+
+        return related
 
     def solve(self) -> bool:
         """
@@ -178,27 +178,31 @@ class SudokuBoard:
         Returns:
             bool: True if a solution was found, False otherwise.
         """
-        # if board is full, return
-        if np.all(grid != 0):
+        # base case: if board is full, return
+        if np.all(grid):
             self.state = grid
             return True
 
-        # find next empty cell
-        index = np.where(grid == 0)[0][0], np.where(grid == 0)[1][0]
+        # this impliments the least possible values heuristic, as described in the report
+        # searching the cell with the fewest possible values reduces the number of branches
+        fewest_possible_values_index = np.argmax(
+            [
+                len(self.related_cells(grid, index)) if grid[index] == 0 else 0
+                for index in self.indices
+            ]
+        )
+        index = self.indices[fewest_possible_values_index]
 
-        # try each possible value
-        for value in self.possible_values[index]:
+        # only try values that are still possible given the current state of the board
+        for value in self.possible_values[index] - self.related_cells(grid, index):
 
-            # if valid, assign the value
-            if value not in self.related_cells(grid, (index)):
-                grid[index] = value
+            # assign the value and recurse
+            grid[index] = value
+            if self.backtrack(grid):
+                return True
 
-                # repeat search with the new grid
-                if self.backtrack(grid):
-                    return True
-
-            # if no valid value, reset the cell and try the next value
+            # if no solution found, reset the cell and try the next value
             grid[index] = 0
 
-        # return False when branch is exhausted
+        # return False if all values have been tried without finding a solution
         return False
