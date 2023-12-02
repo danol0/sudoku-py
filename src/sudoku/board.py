@@ -3,7 +3,7 @@ import time
 import warnings
 
 
-class SudokuBoard:
+class sudokuBoard:
     """
     Class representing a Sudoku board.
 
@@ -21,7 +21,7 @@ class SudokuBoard:
         ValueError: If the initial state is not a 9x9 numpy array or contains invalid values.
 
     Returns:
-        SudokuBoard: A new SudokuBoard object.
+        sudokuBoard: A new sudokuBoard object.
     """
 
     def __init__(self, initial_state: np.ndarray) -> None:
@@ -56,7 +56,7 @@ class SudokuBoard:
 
     def __str__(self) -> str:
         """
-        Prints the board state in a readble format.
+        Prints the board state in a readable format.
 
         Returns:
             str: A string representation of the board state.
@@ -183,15 +183,15 @@ class SudokuBoard:
             self.state = grid
             return True
 
-        # this impliments the least possible values heuristic, as described in the report
+        # this implements the least possible values heuristic, as described in the report
         # searching the cell with the fewest possible values reduces the number of branches
-        fewest_possible_values_index = np.argmax(
+        least_possible_values_index = np.argmax(
             [
                 len(self.related_cells(grid, index)) if grid[index] == 0 else 0
                 for index in self.indices
             ]
         )
-        index = self.indices[fewest_possible_values_index]
+        index = self.indices[least_possible_values_index]
 
         # only try values that are still possible given the current state of the board
         for value in self.possible_values[index] - self.related_cells(grid, index):

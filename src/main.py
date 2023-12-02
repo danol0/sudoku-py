@@ -1,8 +1,8 @@
 import sys
 import sudoku.tools as st
-from sudoku.board import SudokuBoard
+from sudoku.board import sudokuBoard
 
-# default state file is input.txt
+# load file name from command line
 state_file = sys.argv[1] if len(sys.argv) > 1 else None
 if state_file is None:
     raise ValueError("Please specify a state file.")
@@ -11,7 +11,7 @@ if state_file is None:
 state = st.load_initial_state_file(state_file)
 
 # initialize board from state
-board = SudokuBoard(state)
+board = sudokuBoard(state)
 
 # solve board
 board.solve()

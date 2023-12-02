@@ -1,10 +1,14 @@
 import numpy as np
-from src.sudoku.board import SudokuBoard
+from src.sudoku.board import sudokuBoard
 import pytest
 
-# test cases adapted from http://sudopedia.enjoysudoku.com/Invalid_Test_Cases.html
 
-# puzzles with less that 17 clues should raise a warning but be solved
+# Test cases adapted from http://sudopedia.enjoysudoku.com/Test_Cases.html
+
+
+# ************************** Puzzles with insufficient clues ***************************
+# Expected behavior: raises a warning but still solves the puzzle
+
 empty_board = (
     "................................................................................."
 )
@@ -16,7 +20,10 @@ insufficient_clues = (
 )
 warning_puzzles = [empty_board, single_clues, insufficient_clues]
 
-# puzzles with no solution should raise a value error
+
+# **************************** Puzzles with no solution *******************************
+# Expected behavior: raises a value error
+
 box_duplicate = (
     "..9.7...5..21..9..1...28....7...5..1..851.....5....3.......3..68........21.....87"
 )
@@ -35,7 +42,9 @@ invalid_box = (
 invalid_row = (
     "9..1....4.14.3.8....3....9....7.8..18....3..........3..21....7...9.4.5..5...16..3"
 )
-
+invalid_column = (
+    "....41....6.....2...2......32.6.........5..417.......2......23..48......5.1..2..."
+)
 invalid_puzzles = [
     box_duplicate,
     column_duplicate,
@@ -43,9 +52,13 @@ invalid_puzzles = [
     invalid_square,
     invalid_box,
     invalid_row,
+    invalid_column,
 ]
 
-# valid puzzles should be solved without raising any errors
+
+# ********************************* Valid Puzzles *************************************
+# Expected behavior: puzzle solved
+
 solved = (
     "974236158638591742125487936316754289742918563589362417867125394253649871491873625"
 )
@@ -74,27 +87,27 @@ def load_from_string(input_string: str) -> np.ndarray:
     return np.array(numbers).reshape((9, 9))
 
 
-# test that puzzles with insufficient clues raise a warning but are solved
+# Test that puzzles with insufficient clues raise a warning but are still solved
 def test_warning_puzzles():
     for puzzle in warning_puzzles:
         with pytest.warns(UserWarning):
             initial_state = load_from_string(puzzle)
-            board = SudokuBoard(initial_state)
+            board = sudokuBoard(initial_state)
         assert board.solve(), f"Test failed for puzzle: {puzzle}"
 
 
-# test that puzzles with no solution raise a value error
+# Test that puzzles with no solution raise a value error
 def test_invalid_puzzles():
     for puzzle in invalid_puzzles:
         with pytest.raises(ValueError):
             initial_state = load_from_string(puzzle)
-            board = SudokuBoard(initial_state)
+            board = sudokuBoard(initial_state)
             assert board.solve(), f"Test failed for puzzle: {puzzle}"
 
 
-# test that valid puzzles are solved
+# Test that valid puzzles are solved correctly
 def test_valid_puzzles():
     for puzzle in valid_puzzles:
         initial_state = load_from_string(puzzle)
-        board = SudokuBoard(initial_state)
+        board = sudokuBoard(initial_state)
         assert board.solve(), f"Test failed for puzzle: {puzzle}"
