@@ -5,15 +5,22 @@ def load_initial_state_file(input_file: str) -> np.ndarray:
     """
     Load the initial state of the puzzle from the specified input file, allowing for a range of input formats.
 
-    Parameters:
-        input_file (str): Path to file containing the initial state. Must contain exactly 81 digits & dots.
+    Parameters
+    ----------
+    input_file : str
+        Path to file containing the initial state. Must contain exactly 81 digits & dots.
 
-    Returns:
-        numpy.ndarray: The initial state of the board as a 9x9 numpy array, with zeros representing empty cells.
+    Returns
+    -------
+    state : numpy.ndarray
+        The initial state of the board as a 9x9 numpy array, with zeros representing empty cells.
 
-    Raises:
-        FileNotFoundError: If the input file is not found.
-        ValueError: If the input file does not contain exactly 81 digits & dots.
+    Raises
+    ------
+    FileNotFoundError :
+        If the input file is not found.
+    ValueError :
+        If the input file does not contain exactly 81 digits & dots.
     """
     try:
         with open(input_file, "r") as file:
@@ -33,10 +40,5 @@ def load_initial_state_file(input_file: str) -> np.ndarray:
 
         return np.array(numbers).reshape((9, 9))
 
-    except FileNotFoundError as e:
-        print(f"Error: File '{input_file}' not found.")
-        raise e
-
-    except ValueError as ve:
-        print(str(ve))
-        raise ve
+    except FileNotFoundError:
+        raise FileNotFoundError(f"Error: File '{input_file}' not found.")
