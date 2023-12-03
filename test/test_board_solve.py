@@ -62,16 +62,34 @@ invalid_puzzles = [
 solved = (
     "974236158638591742125487936316754289742918563589362417867125394253649871491873625"
 )
+solved_solution = (
+    "974236158638591742125487936316754289742918563589362417867125394253649871491873625"
+)
 last_square = (
     "2564891733746159829817234565932748617128.6549468591327635147298127958634849362715"
+)
+last_square_solution = (
+    "256489173374615982981723456593274861712836549468591327635147298127958634849362715"
 )
 naked_singles = (
     "3.542.81.4879.15.6.29.5637485.793.416132.8957.74.6528.2413.9.655.867.192.965124.8"
 )
+naked_singles_solution = (
+    "365427819487931526129856374852793641613248957974165283241389765538674192796512438"
+)
 hidden_singles = (
     "..2.3...8.....8....31.2.....6..5.27..1.....5.2.4.6..31....8.6.5.......13..531.4.."
 )
+hidden_singles_solution = (
+    "672435198549178362831629547368951274917243856254867931193784625486592713725316489"
+)
 valid_puzzles = [solved, last_square, naked_singles, hidden_singles]
+valid_puzzles_solutions = [
+    solved_solution,
+    last_square_solution,
+    naked_singles_solution,
+    hidden_singles_solution,
+]
 
 
 def load_from_string(input_string: str) -> np.ndarray:
@@ -107,7 +125,10 @@ def test_invalid_puzzles():
 
 # Test that valid puzzles are solved correctly
 def test_valid_puzzles():
-    for puzzle in valid_puzzles:
+    for puzzle, solution in zip(valid_puzzles, valid_puzzles_solutions):
         initial_state = load_from_string(puzzle)
         board = sudokuBoard(initial_state)
         assert board.solve(), f"Test failed for puzzle: {puzzle}"
+        assert np.array_equal(
+            board.state, load_from_string(solution)
+        ), f"Test failed for puzzle: {puzzle}"
