@@ -5,11 +5,11 @@ import warnings
 
 class sudokuBoard:
     """
-    Class representing a Sudoku board.
+    Representation of a Sudoku board with methods for solving.
 
     Parameters
     ----------
-    initial_state : numpy.ndarray[int]
+    initial_state : numpy.ndarray[int] or list[list[int]]
         The initial state of the board.
 
     Attributes
@@ -26,26 +26,86 @@ class sudokuBoard:
     Raises
     ------
     ValueError :
-        If the initial state is not a 9x9 numpy array or contains invalid values.
+        If the initial state is not a 9x9 array or contains invalid values.
 
     Returns
     -------
     self : object
         Initialized SudokuBoard object.
+
+    See Also
+    --------
+    sudoku.tools.load_initial_state : Loads the initial state of a puzzle from a file or a string.
+
+    Examples
+    --------
+    Initialize and solve a board:
+
+    >>> initial_state = [
+        [0, 0, 3, 0, 2, 0, 6, 0, 0],
+        [9, 0, 0, 3, 0, 5, 0, 0, 1],
+        [0, 0, 1, 8, 0, 6, 4, 0, 0],
+        [0, 0, 8, 1, 0, 2, 9, 0, 0],
+        [7, 0, 0, 0, 0, 0, 0, 0, 8],
+        [0, 0, 6, 7, 0, 8, 2, 0, 0],
+        [0, 0, 2, 6, 0, 9, 5, 0, 0],
+        [8, 0, 0, 2, 0, 3, 0, 0, 9],
+        [0, 0, 5, 0, 1, 0, 3, 0, 0]
+    ]
+    >>> board = sudokuBoard(initial_state)
+    >>> board.solve()
+    The puzzle was solved by constraint propagation in 0.0045 seconds.
+
+    >>> print(board)
+    483|921|657
+    967|345|821
+    251|876|493
+    ---+---+---
+    548|132|976
+    729|564|138
+    136|798|245
+    ---+---+---
+    372|689|514
+    814|253|769
+    695|417|382
+
+    The solution can be saved to a file:
+
+    >>> board.save("solution.txt")
+
+    Puzzles with no solution will raise a ValueError when attempting to solve:
+
+    >>> invalid_state = [
+        [0, 0, 7, 0, 4, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 8, 0, 0, 6],
+        [0, 4, 1, 0, 0, 0, 9, 0, 0],
+        [0, 0, 0, 0, 0, 0, 1, 7, 0],
+        [0, 0, 0, 0, 0, 6, 0, 0, 0],
+        [0, 0, 8, 7, 0, 0, 2, 0, 0],
+        [3, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 1, 2, 0, 0, 0, 0],
+        [8, 6, 0, 0, 7, 6, 0, 0, 5]
+    ]
+    >>> board = sudokuBoard(invalid_state)
+    >>> board.solve()
+    ValueError: No solutions exist for this puzzle.
     """
 
-    def __init__(self, initial_state: np.ndarray) -> None:
+    def __init__(self, initial_state: np.ndarray | list = None) -> None:
         """
         Initializes the board object from the specified initial state.
         """
-        # check that the initial state is valid
+        if initial_state is None:
+            raise ValueError("No initial state provided when initializing board.")
+
+        if isinstance(initial_state, list):
+            try:
+                initial_state = np.array(initial_state)
+            except ValueError:
+                raise ValueError("Could not convert initial state to numpy array.")
         if not isinstance(initial_state, np.ndarray):
             raise ValueError(
-                "Trying to initialize board with an object that is not an array."
-            )
-        if initial_state.dtype != np.int64:
-            raise ValueError(
-                "Trying to initialize board with an array of incorrect dtype."
+                "Trying to initialize board with an object of incorrect type."
             )
         if initial_state.shape != (9, 9):
             try:
@@ -54,17 +114,20 @@ class sudokuBoard:
                 raise ValueError(
                     "Trying to initialize board with an array of incorrect shape."
                 )
+        if initial_state.dtype != np.int64:
+            raise ValueError(
+                "Trying to initialize board with an array of incorrect dtype."
+            )
         if np.logical_or(initial_state < 0, initial_state > 9).any():
             raise ValueError(
                 "Trying to initialize board with an array containing invalid values."
             )
+        if np.count_nonzero(initial_state) < 17:
+            warnings.warn("WARNING: The puzzle has multiple solutions.")
 
         # initialize indices and state attributes
         self.indices = [(i, j) for i in range(9) for j in range(9)]
         self.state = initial_state
-
-        if np.count_nonzero(self.state) < 17:
-            warnings.warn("WARNING: The puzzle has multiple solutions.")
 
         # initialize the possible values attribute & update
         values_set = np.array([set(range(1, 10)) for _ in range(81)])
@@ -79,21 +142,6 @@ class sudokuBoard:
         -------
         output : str
             A string representation of the board.
-
-        Examples
-        --------
-        >>> print(board)
-        594|167|832
-        618|239|574
-        237|458|169
-        ---+---+---
-        981|726|345
-        375|841|296
-        426|395|781
-        ---+---+---
-        762|584|913
-        143|972|658
-        859|613|427
         """
         output = ""
         for row in range(9):
@@ -135,6 +183,7 @@ class sudokuBoard:
             return True
 
         else:
+            # if backtracking fails, no solutions exist
             end = time.time()
             raise ValueError(
                 f"No solutions exist for this puzzle. Search took {end - start:.3} seconds."
@@ -241,7 +290,7 @@ class sudokuBoard:
             self.state = grid
             return True
 
-        # this implements the least possible values heuristic - see section 3.3.2 of report
+        # this implements the least possible values heuristic - see section 3.3.2 report
         # find the index of the cell with the least possible values
         least_possible_values_index = np.argmax(
             [
@@ -264,3 +313,15 @@ class sudokuBoard:
 
         # return False if all values have been tried without finding a solution
         return False
+
+    def save(self, filename: str) -> None:
+        """
+        Saves the current state of the board to a file.
+
+        Parameters
+        ----------
+        filename : str
+            The name of the file to save to.
+        """
+        with open(filename, "w") as file:
+            file.write(str(self))

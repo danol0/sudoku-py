@@ -1,12 +1,12 @@
-import numpy as np
 from src.sudoku.board import sudokuBoard
+from src.sudoku.tools import load_initial_state
+import numpy as np
 import pytest
-
 
 # Test cases adapted from http://sudopedia.enjoysudoku.com/Test_Cases.html
 
 
-# ************************** Puzzles with insufficient clues ***************************
+# -------------------------- Puzzles with insufficient clues ---------------------------
 # Expected behavior: raises a warning but still solves the puzzle
 
 empty_board = (
@@ -21,8 +21,8 @@ insufficient_clues = (
 warning_puzzles = [empty_board, single_clues, insufficient_clues]
 
 
-# **************************** Puzzles with no solution *******************************
-# Expected behavior: raises a value error
+# ------------------------------ Puzzles with no solution ------------------------------
+# Expected behavior: raises a value error when attempting to solve
 
 box_duplicate = (
     "..9.7...5..21..9..1...28....7...5..1..851.....5....3.......3..68........21.....87"
@@ -56,7 +56,7 @@ invalid_puzzles = [
 ]
 
 
-# ********************************* Valid Puzzles *************************************
+# ----------------------------------- Valid Puzzles -----------------------------------
 # Expected behavior: puzzle solved
 
 solved = (
@@ -92,24 +92,11 @@ valid_puzzles_solutions = [
 ]
 
 
-def load_from_string(input_string: str) -> np.ndarray:
-    """
-    Modified input loader for test cases.
-    """
-    # Extract all digits and dots from the file & replace dots with zeros
-    numbers = [
-        int(char) if char.isdigit() else 0
-        for char in input_string
-        if char.isdigit() or char == "."
-    ]
-    return np.array(numbers).reshape((9, 9))
-
-
 # Test that puzzles with insufficient clues raise a warning but are still solved
 def test_warning_puzzles():
     for puzzle in warning_puzzles:
         with pytest.warns(UserWarning):
-            initial_state = load_from_string(puzzle)
+            initial_state = load_initial_state(puzzle)
             board = sudokuBoard(initial_state)
         assert board.solve(), f"Test failed for puzzle: {puzzle}"
 
@@ -118,7 +105,7 @@ def test_warning_puzzles():
 def test_invalid_puzzles():
     for puzzle in invalid_puzzles:
         with pytest.raises(ValueError):
-            initial_state = load_from_string(puzzle)
+            initial_state = load_initial_state(puzzle)
             board = sudokuBoard(initial_state)
             assert board.solve(), f"Test failed for puzzle: {puzzle}"
 
@@ -126,9 +113,9 @@ def test_invalid_puzzles():
 # Test that valid puzzles are solved correctly
 def test_valid_puzzles():
     for puzzle, solution in zip(valid_puzzles, valid_puzzles_solutions):
-        initial_state = load_from_string(puzzle)
+        initial_state = load_initial_state(puzzle)
         board = sudokuBoard(initial_state)
         assert board.solve(), f"Test failed for puzzle: {puzzle}"
         assert np.array_equal(
-            board.state, load_from_string(solution)
+            board.state, load_initial_state(solution)
         ), f"Test failed for puzzle: {puzzle}"
