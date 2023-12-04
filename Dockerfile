@@ -1,6 +1,6 @@
 FROM python:3
 
-# Change to use your own input file, which will be copied across
+# Change to copy a differenet input file to the container
 ENV INPUT_FILE=input.txt
 
 # Cannot clone private gitlab repo without setting up access key as a secret
@@ -15,5 +15,3 @@ COPY $INPUT_FILE app/input.txt
 
 WORKDIR /app
 RUN pip install -r requirements.txt
-
-CMD python src/main.py input.txt
