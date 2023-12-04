@@ -5,73 +5,77 @@ import warnings
 
 class sudokuBoard:
     """
-        Representation of a Sudoku board with methods for solving.
+    Representation of a Sudoku board with methods for solving.
 
-        Parameters
-        ----------
-        initial_state : numpy.ndarray[int] or list[list[int]]
-            The initial state of the board.
+    Parameters
+    ----------
+    initial_state : numpy.ndarray[int] or list[list[int]]
+        The initial state of the board.
 
-        Attributes
-        ----------
-        state : numpy.ndarray[int]
-            The current state of the board.
+    Attributes
+    ----------
+    state : numpy.ndarray[int]
+        The current state of the board.
 
-        possible_values : numpy.ndarray[set]
-            The possible values for each cell.
+    possible_values : numpy.ndarray[set]
+        The possible values for each cell.
 
-        indices : list[tuple[int, int]]
-            The indices of each cell.
+    indices : list[tuple[int, int]]
+        The indices of each cell.
 
-        Raises
-        ------
-        ValueError :
-            If the initial state is not a 9x9 array or contains invalid values.
+    Raises
+    ------
+    ValueError :
+        If the initial state is not a 9x9 array or contains invalid values.
 
-        Returns
-        -------
-        self : object
-            Initialized SudokuBoard object.
+    Returns
+    -------
+    self : object
+        Initialized SudokuBoard object.
 
-        See Also
-        --------
-        sudoku.tools.load_initial_state : Loads the initial state of a puzzle from a file or a string.
+    See Also
+    --------
+    sudoku.tools.load_initial_state : Loads the initial state of a puzzle from a file or a string.
 
-        Examples
-        --------
-        Initialize and solve a board:
+    Examples
+    --------
+    Initialize and solve a board:
 
-        >>> initial_state = [
-            [0, 0, 3, 0, 2, 0, 6, 0, 0],
-            [9, 0, 0, 3, 0, 5, 0, 0, 1],
-            [0, 0, 1, 8, 0, 6, 4, 0, 0],
-            [0, 0, 8, 1, 0, 2, 9, 0, 0],
-            [7, 0, 0, 0, 0, 0, 0, 0, 8],
-            [0, 0, 6, 7, 0, 8, 2, 0, 0],
-            [0, 0, 2, 6, 0, 9, 5, 0, 0],
-            [8, 0, 0, 2, 0, 3, 0, 0, 9],
-            [0, 0, 5, 0, 1, 0, 3, 0, 0]
-        ]
-        >>> board = sudokuBoard(initial_state)
-        >>> board.solve()
-        The puzzle was solved by constraint propagation in 0.0045 seconds.
-        >>> print(board)
-        483|921|657
-        967|345|821
-        251|876|493
-        ---+---+---
-        548|132|976
-        729|564|138
-        136|798|245
-        ---+---+---
-        372|689|514
-        814|253|769
-        695|417|382
+    >>> initial_state = [
+        [0, 0, 3, 0, 2, 0, 6, 0, 0],
+        [9, 0, 0, 3, 0, 5, 0, 0, 1],
+        [0, 0, 1, 8, 0, 6, 4, 0, 0],
+        [0, 0, 8, 1, 0, 2, 9, 0, 0],
+        [7, 0, 0, 0, 0, 0, 0, 0, 8],
+        [0, 0, 6, 7, 0, 8, 2, 0, 0],
+        [0, 0, 2, 6, 0, 9, 5, 0, 0],
+        [8, 0, 0, 2, 0, 3, 0, 0, 9],
+        [0, 0, 5, 0, 1, 0, 3, 0, 0]
+    ]
+    >>> board = sudokuBoard(initial_state)
+    >>> board.solve()
+    The puzzle was solved by constraint propagation in 0.0045 seconds.
 
+    >>> print(board)
+    483|921|657
+    967|345|821
+    251|876|493
+    ---+---+---
+    548|132|976
+    729|564|138
+    136|798|245
+    ---+---+---
+    372|689|514
+    814|253|769
+    695|417|382
 
-        Puzzles with no solution will raise a ValueError when attempting to solve:
+    The solution can be saved to a file:
 
-        >>> invalid_state = [
+    >>> board.save("solution.txt")
+
+    Puzzles with no solution will raise a ValueError when attempting to solve:
+
+    >>> invalid_state = [
         [0, 0, 7, 0, 4, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 8, 0, 0, 6],
         [0, 4, 1, 0, 0, 0, 9, 0, 0],
@@ -82,9 +86,9 @@ class sudokuBoard:
         [0, 0, 0, 1, 2, 0, 0, 0, 0],
         [8, 6, 0, 0, 7, 6, 0, 0, 5]
     ]
-        >>> board = sudokuBoard(invalid_state)
-        >>> board.solve()
-        ValueError: No solutions exist for this puzzle.
+    >>> board = sudokuBoard(invalid_state)
+    >>> board.solve()
+    ValueError: No solutions exist for this puzzle.
     """
 
     def __init__(self, initial_state: np.ndarray | list = None) -> None:
@@ -309,3 +313,15 @@ class sudokuBoard:
 
         # return False if all values have been tried without finding a solution
         return False
+
+    def save(self, filename: str) -> None:
+        """
+        Saves the current state of the board to a file.
+
+        Parameters
+        ----------
+        filename : str
+            The name of the file to save to.
+        """
+        with open(filename, "w") as file:
+            file.write(str(self))
