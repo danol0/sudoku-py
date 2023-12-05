@@ -37,9 +37,28 @@ def test_board_init_with_list():
     assert np.array_equal(board.state, np.array(initial_state))
 
 
+def test_no_initial_state():
+    with pytest.raises(TypeError):
+        sudokuBoard()
+
+
 def test_board_init_invalid_type():
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         sudokuBoard("invalid")
+        sudokuBoard(1)
+        sudokuBoard(1.0)
+        sudokuBoard(True)
+        sudokuBoard(None)
+        sudokuBoard((1, 2, 3))
+
+
+def test_board_init_invalid_list_shape():
+    initial_state = [
+        [0, 0, 0, 0, 0, 7, 0, 0, 0],
+        [0, 0, 0, 0, 0, 9, 5, 0, 4],
+    ]
+    with pytest.raises(ValueError):
+        sudokuBoard(initial_state)
 
 
 def test_board_init_invalid_shape():
@@ -82,11 +101,6 @@ def test_board_init_invalid_values():
     )
     with pytest.raises(ValueError):
         sudokuBoard(initial_state)
-
-
-def test_no_initial_state():
-    with pytest.raises(ValueError):
-        sudokuBoard()
 
 
 def test_board_display():

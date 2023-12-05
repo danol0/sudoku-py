@@ -5,7 +5,7 @@ import warnings
 
 class sudokuBoard:
     """
-    Representation of a Sudoku board with methods for solving.
+    Class representing a Sudoku board with methods for solving.
 
     Parameters
     ----------
@@ -35,7 +35,8 @@ class sudokuBoard:
 
     See Also
     --------
-    sudoku.tools.load_initial_state : Loads the initial state of a puzzle from a file or a string.
+    sudoku.tools.load_initial_state :
+        Loads the initial state of a puzzle from a file or a string.
 
     Examples
     --------
@@ -91,37 +92,34 @@ class sudokuBoard:
     ValueError: No solutions exist for this puzzle.
     """
 
-    def __init__(self, initial_state: np.ndarray | list = None) -> None:
+    def __init__(self, initial_state: np.ndarray | list[list[int]]) -> None:
         """
         Initializes the board object from the specified initial state.
         """
-        if initial_state is None:
-            raise ValueError("No initial state provided when initializing board.")
-
+        # convert initial state to numpy array if necessary
         if isinstance(initial_state, list):
             try:
                 initial_state = np.array(initial_state)
-            except ValueError:
-                raise ValueError("Could not convert initial state to numpy array.")
+            except TypeError:
+                raise TypeError("Error converting initial state to numpy array.")
+
+        # check that initial state is a 9x9 array of integers
         if not isinstance(initial_state, np.ndarray):
-            raise ValueError(
-                "Trying to initialize board with an object of incorrect type."
-            )
+            raise TypeError("Initializing board with an object of incorrect type.")
+
         if initial_state.shape != (9, 9):
             try:
                 initial_state = initial_state.reshape(9, 9)
             except ValueError:
-                raise ValueError(
-                    "Trying to initialize board with an array of incorrect shape."
-                )
+                raise ValueError("Initializing board with an array of incorrect shape.")
+
         if initial_state.dtype != np.int64:
-            raise ValueError(
-                "Trying to initialize board with an array of incorrect dtype."
-            )
+            raise ValueError("Initializing board with an array of incorrect dtype.")
+
         if np.logical_or(initial_state < 0, initial_state > 9).any():
-            raise ValueError(
-                "Trying to initialize board with an array containing invalid values."
-            )
+            raise ValueError("Initializing board with array containing invalid values.")
+
+        # check that the puzzle has at least 17 clues
         if np.count_nonzero(initial_state) < 17:
             warnings.warn("WARNING: The puzzle has multiple solutions.")
 
