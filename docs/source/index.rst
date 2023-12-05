@@ -1,5 +1,5 @@
-Sudoku-Solver's documentation
-=============================
+Welcome to sudoku-py's documentation
+====================================
 
 .. toctree::
    :maxdepth: 2
