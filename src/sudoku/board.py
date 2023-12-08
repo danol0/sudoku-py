@@ -103,7 +103,7 @@ class sudokuBoard:
             except TypeError:
                 raise TypeError("Error converting initial state to numpy array.")
 
-        # check that initial state is a 9x9 array of integers
+        # the following checks ensure that the initial state is a 9x9 array of integers
         if not isinstance(initial_state, np.ndarray):
             raise TypeError("Initializing board with an object of incorrect type.")
 
@@ -119,7 +119,7 @@ class sudokuBoard:
         if np.logical_or(initial_state < 0, initial_state > 9).any():
             raise ValueError("Initializing board with array containing invalid values.")
 
-        # check that the puzzle has at least 17 clues
+        # puzzles with less than 17 clues have multiple solutions. source: https://arxiv.org/abs/2305.01697
         if np.count_nonzero(initial_state) < 17:
             warnings.warn("WARNING: The puzzle has multiple solutions.")
 
@@ -190,15 +190,27 @@ class sudokuBoard:
     def update_possible_values(self) -> None:
         """
         Updates the possible values attribute given the current state of the board.
+
+        Note
+        ----
+        The possible values attribute is updated in-place.
+
+        Raises
+        ------
+        ValueError
+            If a cell has no possible values, so the board is invalid.
         """
         # for empty cells, remove values in related cells from the possible values
         for index in self.indices:
             if self.state[index] == 0:
-                self.possible_values[index] -= self.related_cells(self.state, (index))
+                self.possible_values[index] -= self.related_cells(self.state, index)
 
                 # if no possible values, the board is invalid
                 if self.possible_values[index] == set():
-                    raise ValueError("No solutions exist for this puzzle.")
+                    raise ValueError(
+                        f"The cell in row {index[0]+1} and column {index[1]+1} has no possible values. "
+                        "This puzzle has no solutions, please check the input."
+                    )
 
     def related_cells(self, grid: np.ndarray, index: tuple) -> set:
         """

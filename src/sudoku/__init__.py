@@ -9,7 +9,7 @@ Python package for solving sudoku puzzles.
 
 Modules
 -------
-- board: Defines the Sudoku board class and its operations.
+- board: Defines the sudokuBoard class and its operations.
 - tools: Provides utility functions for loading Sudoku puzzles.
 
 Examples

@@ -3,6 +3,8 @@ from src.sudoku.tools import load_initial_state
 import numpy as np
 import pytest
 
+# This file contains test cases for the sudokuBoard.solve() method.
+
 # Test cases adapted from http://sudopedia.enjoysudoku.com/Test_Cases.html
 
 
@@ -92,8 +94,13 @@ valid_puzzles_solutions = [
 ]
 
 
-# Test that puzzles with insufficient clues raise a warning but are still solved
 def test_warning_puzzles():
+    """
+    Test function to verify correct behavior for puzzles with insufficient clues.
+
+    For each puzzle in the warning_puzzles list, the function checks that a warning is raised
+    but the puzzle is still solved.
+    """
     for puzzle in warning_puzzles:
         with pytest.warns(UserWarning):
             initial_state = load_initial_state(puzzle)
@@ -101,8 +108,13 @@ def test_warning_puzzles():
         assert board.solve(), f"Test failed for puzzle: {puzzle}"
 
 
-# Test that puzzles with no solution raise a value error
 def test_invalid_puzzles():
+    """
+    Test function to verify correct behavior for puzzles with no solution.
+
+    For each puzzle in the invalid_puzzles list, the function checks that a value error is raised
+    when attempting to solve the puzzle.
+    """
     for puzzle in invalid_puzzles:
         with pytest.raises(ValueError):
             initial_state = load_initial_state(puzzle)
@@ -110,8 +122,13 @@ def test_invalid_puzzles():
             assert board.solve(), f"Test failed for puzzle: {puzzle}"
 
 
-# Test that valid puzzles are solved correctly
 def test_valid_puzzles():
+    """
+    Test function to verify correct behavior for valid puzzles.
+
+    For each puzzle in the valid_puzzles list, the function checks that the puzzle is solved
+    and that the solution is correct.
+    """
     for puzzle, solution in zip(valid_puzzles, valid_puzzles_solutions):
         initial_state = load_initial_state(puzzle)
         board = sudokuBoard(initial_state)
