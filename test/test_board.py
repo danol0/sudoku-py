@@ -2,7 +2,10 @@ from src.sudoku.board import sudokuBoard
 import numpy as np
 import pytest
 
-# This file contains test cases for the sudokuBoard class.
+# This file contains test cases for the sudokuBoard class
+
+
+# ------------------------------- Initialization ---------------------------------
 
 
 def test_board_init_with_np_array():
@@ -45,25 +48,83 @@ def test_board_init_with_list():
     assert np.array_equal(board.state, np.array(initial_state))
 
 
-def test_no_initial_state():
+def test_board_init_with_string():
+    """ "
+    Test case to check that the initial state is loaded correctly from a string.
     """
-    Test case to check that a value error is raised when no initial state is provided.
+
+    input_formats = [
+        "..2.3...8.....8....31.2.....6..5.27..1.....5.2.4.6..31....8.6.5.......13..531.4..",
+        "002030008000008000031020000060050270010000050204060031000080605000000013005310400",
+        "002|030|008\n000|008|000\n031|020|000\n---+---+---\n060|050|270\n010|000|050\n204|060|031\n---+---+---\n000|080|605\n000|000|013\n005|310|400",
+    ]
+
+    for input in input_formats:
+        assert np.array_equal(
+            sudokuBoard(input).state,
+            np.array(
+                [
+                    [0, 0, 2, 0, 3, 0, 0, 0, 8],
+                    [0, 0, 0, 0, 0, 8, 0, 0, 0],
+                    [0, 3, 1, 0, 2, 0, 0, 0, 0],
+                    [0, 6, 0, 0, 5, 0, 2, 7, 0],
+                    [0, 1, 0, 0, 0, 0, 0, 5, 0],
+                    [2, 0, 4, 0, 6, 0, 0, 3, 1],
+                    [0, 0, 0, 0, 8, 0, 6, 0, 5],
+                    [0, 0, 0, 0, 0, 0, 0, 1, 3],
+                    [0, 0, 5, 3, 1, 0, 4, 0, 0],
+                ]
+            ),
+        )
+
+
+@pytest.fixture
+def complete_initial_state(tmp_path):
     """
-    with pytest.raises(TypeError):
-        sudokuBoard()
+    Simulate an input file of a complete board.
+    """
+    state_data = "594167832618239574237458169981726345375841296426395781762584913143972658859613472"
+    file_path = tmp_path / "initial_state.txt"
+    file_path.write_text(state_data)
+    return str(file_path)
+
+
+def test_load_initial_state_from_file(complete_initial_state):
+    """
+    Test case to check that the initial state is loaded correctly from a file.
+    """
+    assert np.array_equal(
+        sudokuBoard(complete_initial_state).state,
+        np.array(
+            [
+                [5, 9, 4, 1, 6, 7, 8, 3, 2],
+                [6, 1, 8, 2, 3, 9, 5, 7, 4],
+                [2, 3, 7, 4, 5, 8, 1, 6, 9],
+                [9, 8, 1, 7, 2, 6, 3, 4, 5],
+                [3, 7, 5, 8, 4, 1, 2, 9, 6],
+                [4, 2, 6, 3, 9, 5, 7, 8, 1],
+                [7, 6, 2, 5, 8, 4, 9, 1, 3],
+                [1, 4, 3, 9, 7, 2, 6, 5, 8],
+                [8, 5, 9, 6, 1, 3, 4, 7, 2],
+            ]
+        ),
+    )
 
 
 def test_board_init_invalid_type():
     """
-    Test cases to check that a type error is raised when the initial state is not a numpy array or list.
+    Test cases to check that a type error is raised when the initial state is invalid.
     """
     with pytest.raises(TypeError):
-        sudokuBoard("invalid")
         sudokuBoard(1)
         sudokuBoard(1.0)
         sudokuBoard(True)
-        sudokuBoard(None)
         sudokuBoard((1, 2, 3))
+        sudokuBoard()
+        sudokuBoard([1, 2, 3])
+        sudokuBoard(np.array([1, 2, 3]))
+        sudokuBoard(np.zeros((9, 9), dtype=float))
+        sudokuBoard(None)
 
 
 def test_board_init_invalid_shape():
@@ -114,6 +175,16 @@ def test_board_init_invalid_dtype():
         sudokuBoard(initial_state_list)
 
 
+def test_board_init_invalid_string():
+    """
+    Test cases to check that a value error is raised when the initial state is not a valid string.
+    """
+    with pytest.raises(ValueError):
+        sudokuBoard("invalid")
+        sudokuBoard("123445689")
+        sudokuBoard("does_not_exist.txt")
+
+
 def test_board_init_invalid_values():
     """
     Test cases to check that a value error is raised when the initial state contains values outside of 0-9.
@@ -147,6 +218,9 @@ def test_board_init_invalid_values():
         sudokuBoard(initial_state_list)
 
 
+# ------------------------------- Display ---------------------------------
+
+
 def test_board_display():
     """
     Test case to check that the board is correctly represented as a string.
@@ -168,12 +242,12 @@ def test_board_display():
     )
 
 
-def test_board_constraints():
-    """
-    Test case to check that the constraints are applied correctly.
+# ------------------------------- Constraints ---------------------------------
 
-    The initial state is solvable through constraints alone. The function checks that the
-    possible values are correctly updated and that the board is solved.
+
+def test_board_possible_values():
+    """
+    Test case to check that the possible values are updated correctly.
     """
     initial_state = np.array(
         [
@@ -191,37 +265,6 @@ def test_board_constraints():
     board = sudokuBoard(initial_state)
     assert board.possible_values[3, 7] == {7}
     assert board.possible_values[8, 8] == {2}
-    solved = board.propagate_constraints()  # should solve the board
-    assert solved
-    assert board.state[3, 7] == 7
-    assert board.state[8, 8] == 2
-
-
-def test_board_backtrack():
-    """
-    Test case to check that the board is solved through backtracking.
-
-    The initial state is not solvable through constraints alone. The function checks that the
-    solve method returns True, indicating that backtracking was required to solve the board.
-
-    Further test cases for solve functionality can be found in test_board_solve.py.
-    """
-    initial_state = np.array(
-        [
-            [0, 0, 0, 0, 0, 7, 0, 0, 0],
-            [0, 0, 0, 0, 0, 9, 5, 0, 4],
-            [0, 0, 0, 0, 5, 0, 1, 6, 9],
-            [0, 8, 0, 0, 0, 0, 3, 0, 5],
-            [0, 7, 5, 0, 0, 0, 2, 9, 0],
-            [4, 0, 6, 0, 0, 0, 0, 8, 0],
-            [7, 6, 2, 0, 8, 0, 0, 0, 0],
-            [1, 0, 3, 9, 0, 0, 0, 0, 0],
-            [0, 0, 0, 6, 0, 0, 0, 0, 0],
-        ]
-    )
-    board = sudokuBoard(initial_state)
-    assert not board.propagate_constraints()  # not solvable through constraints alone
-    assert board.solve()  # thus backtracking is required
 
 
 def test_related_cells():

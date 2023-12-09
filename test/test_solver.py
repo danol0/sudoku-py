@@ -1,9 +1,8 @@
-from src.sudoku.board import sudokuBoard
-from src.sudoku.tools import load_initial_state
+from src.sudoku.solver import sudokuSolver
 import numpy as np
 import pytest
 
-# This file contains test cases for the sudokuBoard.solve() method.
+# This file contains test cases for the sudokuSolver class.
 
 # Test cases adapted from http://sudopedia.enjoysudoku.com/Test_Cases.html
 
@@ -103,8 +102,7 @@ def test_warning_puzzles():
     """
     for puzzle in warning_puzzles:
         with pytest.warns(UserWarning):
-            initial_state = load_initial_state(puzzle)
-            board = sudokuBoard(initial_state)
+            board = sudokuSolver(puzzle)
         assert board.solve(), f"Test failed for puzzle: {puzzle}"
 
 
@@ -117,8 +115,7 @@ def test_invalid_puzzles():
     """
     for puzzle in invalid_puzzles:
         with pytest.raises(ValueError):
-            initial_state = load_initial_state(puzzle)
-            board = sudokuBoard(initial_state)
+            board = sudokuSolver(puzzle)
             assert board.solve(), f"Test failed for puzzle: {puzzle}"
 
 
@@ -130,9 +127,33 @@ def test_valid_puzzles():
     and that the solution is correct.
     """
     for puzzle, solution in zip(valid_puzzles, valid_puzzles_solutions):
-        initial_state = load_initial_state(puzzle)
-        board = sudokuBoard(initial_state)
+        board = sudokuSolver(puzzle)
         assert board.solve(), f"Test failed for puzzle: {puzzle}"
         assert np.array_equal(
-            board.state, load_initial_state(solution)
+            board.state, sudokuSolver(solution).state
         ), f"Test failed for puzzle: {puzzle}"
+
+
+def test_board_backtrack():
+    """
+    Test case to check that the board is solved through backtracking.
+
+    The initial state is not solvable through constraints alone. The function checks that the
+    solve method returns True, indicating that backtracking was required to solve the board.
+    """
+    initial_state = np.array(
+        [
+            [0, 0, 0, 0, 0, 7, 0, 0, 0],
+            [0, 0, 0, 0, 0, 9, 5, 0, 4],
+            [0, 0, 0, 0, 5, 0, 1, 6, 9],
+            [0, 8, 0, 0, 0, 0, 3, 0, 5],
+            [0, 7, 5, 0, 0, 0, 2, 9, 0],
+            [4, 0, 6, 0, 0, 0, 0, 8, 0],
+            [7, 6, 2, 0, 8, 0, 0, 0, 0],
+            [1, 0, 3, 9, 0, 0, 0, 0, 0],
+            [0, 0, 0, 6, 0, 0, 0, 0, 0],
+        ]
+    )
+    board = sudokuSolver(initial_state)
+    assert not board.propagate_constraints()  # not solvable through constraints alone
+    assert board.solve()  # thus backtracking is required

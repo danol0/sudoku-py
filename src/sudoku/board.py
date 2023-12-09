@@ -1,16 +1,16 @@
 import numpy as np
-import time
 import warnings
+import os
 
 
 class sudokuBoard:
     """
-    Class representing a Sudoku board with methods for solving.
+    This class contains methods for initializing and checking the validity of a Sudoku board.
 
     Parameters
     ----------
-    initial_state : numpy.ndarray[int] or list[list[int]]
-        The initial state of the board.
+    initial_state : str or numpy.ndarray[int] or list[list[int]]
+        The initial state of the board. Can be provided as a string, a file path, or a 9x9 array.
 
     Attributes
     ----------
@@ -35,12 +35,22 @@ class sudokuBoard:
 
     See Also
     --------
-    sudoku.tools.load_initial_state :
-        Loads the initial state of a puzzle from a file or a string.
+    sudokuSolver :
+        Child class of SudokuBoard that contains methods for solving.
 
     Examples
     --------
-    Initialize and solve a board:
+    Load the initial state from a file:
+
+    >>> board = sudokuBoard("input.txt")
+    Loading initial state from file: input.txt
+
+    Load the initial state from a string:
+
+    >>> board = sudokuBoard("594167832618239574237458169981726345375841296426395781762584913143972658859613472")
+    Loading initial state from string.
+
+    Initialize directly with an array:
 
     >>> initial_state = [
         [0, 0, 3, 0, 2, 0, 6, 0, 0],
@@ -54,8 +64,8 @@ class sudokuBoard:
         [0, 0, 5, 0, 1, 0, 3, 0, 0]
     ]
     >>> board = sudokuBoard(initial_state)
-    >>> board.solve()
-    The puzzle was solved by constraint propagation in 0.0045 seconds.
+
+    The board can be printed in a readable format:
 
     >>> print(board)
     483|921|657
@@ -70,32 +80,41 @@ class sudokuBoard:
     814|253|769
     695|417|382
 
-    The solution can be saved to a file:
+    The board in its current state can be saved to a file:
 
     >>> board.save("solution.txt")
 
-    Puzzles with no solution will raise a ValueError when attempting to solve:
+    Invalid boards will raise an error:
 
     >>> invalid_state = [
-        [0, 0, 7, 0, 4, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 8, 0, 0, 6],
-        [0, 4, 1, 0, 0, 0, 9, 0, 0],
-        [0, 0, 0, 0, 0, 0, 1, 7, 0],
-        [0, 0, 0, 0, 0, 6, 0, 0, 0],
-        [0, 0, 8, 7, 0, 0, 2, 0, 0],
-        [3, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 1, 2, 0, 0, 0, 0],
-        [8, 6, 0, 0, 7, 6, 0, 0, 5]
+        [0, 0, 0, 0, 0, 0, 1, 2, 3],
+        [0, 0, 9, 0, 0, 0, 0, 4, 5],
+        [0, 0, 0, 0, 0, 0, 6, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 7, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 8, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0]
     ]
     >>> board = sudokuBoard(invalid_state)
-    >>> board.solve()
-    ValueError: No solutions exist for this puzzle.
+    ValueError: The cell in row 2 and column 7 has no possible values. This puzzle has no solutions.
+
+    Valid puzzles with multiple solutions will raise a warning:
+
+    >>> board = sudokuBoard("........................................1........................................")
+    WARNING: The puzzle has multiple solutions.
     """
 
-    def __init__(self, initial_state: np.ndarray | list[list[int]]) -> None:
+    def __init__(self, initial_state: str | np.ndarray | list[list[int]]) -> None:
         """
-        Initializes the board object from the specified initial state.
+        Initializes the board object from the specified initial state. Loads directly from array like objects,
+        or uses the load_initial_state method to parse strings and file paths.
         """
+        # use load_initial_state method to parse input if given as a string or file path
+        if isinstance(initial_state, str):
+            initial_state = self.load_initial_state(initial_state)
+
         # convert initial state to numpy array if necessary
         if isinstance(initial_state, list):
             try:
@@ -152,40 +171,52 @@ class sudokuBoard:
             output += "\n"
         return output
 
-    def solve(self) -> bool:
+    def load_initial_state(self, input: str) -> np.ndarray:
         """
-        Attempts to solve the board by calling constraint propagation and then backtracking.
+        Load the initial state of a puzzle to a 9x9 array from a file or a string.
+
+        Parameters
+        ----------
+        input : str
+            Path to file containing the initial state or the initial state as a string.
+            Must contain exactly 81 digits & dots (dots & zeros represent empty cells).
 
         Returns
         -------
-        solved : bool
-            True if the board was solved, False if no solutions exist.
+        state : numpy.ndarray
+            The initial state of the board as a 9x9 numpy array, with zeros representing empty cells.
 
         Raises
         ------
-        ValueError
-            If no solutions exist for the puzzle. The search time is included in the error message.
+        FileNotFoundError :
+            If the input file is not found.
+        ValueError :
+            If the input does not contain exactly 81 digits & dots.
         """
-        start = time.time()
 
-        if self.propagate_constraints():
-            end = time.time()
-            print(
-                f"The puzzle was solved by constraint propagation in {end - start:.3} seconds."
-            )
-            return True
-
-        elif self.backtrack(self.state):
-            end = time.time()
-            print(f"The puzzle was solved by brute force in {end - start:.3} seconds")
-            return True
-
+        # Check if the input is a file or a string
+        if os.path.isfile(input):
+            print(f"Loading initial state from file: {input}")
+            with open(input, "r") as file:
+                puzzle = file.read()
         else:
-            # if backtracking fails, no solutions exist
-            end = time.time()
+            print("Loading initial state from string.")
+            puzzle = input
+
+        # Extract all digits and dots from the input & replace dots with zeros
+        board = [
+            int(char) if char.isdigit() else 0
+            for char in puzzle
+            if char.isdigit() or char == "."
+        ]
+
+        # Check that the extracted board is of the correct size
+        if len(board) != 81:
             raise ValueError(
-                f"No solutions exist for this puzzle. Search took {end - start:.3} seconds."
+                "Please check the input: must contain exactly 81 digits & full stops."
             )
+
+        return np.array(board).reshape((9, 9))
 
     def update_possible_values(self) -> None:
         """
@@ -209,7 +240,7 @@ class sudokuBoard:
                 if self.possible_values[index] == set():
                     raise ValueError(
                         f"The cell in row {index[0]+1} and column {index[1]+1} has no possible values. "
-                        "This puzzle has no solutions, please check the input."
+                        "This puzzle has no solutions."
                     )
 
     def related_cells(self, grid: np.ndarray, index: tuple) -> set:
@@ -246,83 +277,6 @@ class sudokuBoard:
         }
 
         return related
-
-    def propagate_constraints(self) -> bool:
-        """
-        Assigns values for cells with only one possible value and propagates.
-
-        Note
-        ----
-        Assignment is to the state attribute.
-        Propagation continues until no more updates are made or the board is full.
-
-        Returns
-        -------
-        solved : bool
-            True if the board is complete, False otherwise.
-        """
-        # if board is full, return
-        if np.all(self.state):
-            return True
-
-        # update possible values for the current state
-        self.update_possible_values()
-
-        for index in self.indices:
-            # if cell has only one possible value, assign it and propagate
-            if len(self.possible_values[index]) == 1:
-                self.state[index] = self.possible_values[index].pop()
-                return self.propagate_constraints()
-
-        # return False once propagation is complete
-        return False
-
-    def backtrack(self, grid: np.ndarray) -> bool:
-        """
-        Recursive, depth-first search on the given board state.
-
-        Note
-        ----
-        If a solution is found, the state attribute is updated to the solved board.
-
-        Args
-        ----
-        grid : numpy.ndarray
-            The board state to search.
-
-        Returns
-        -------
-        solved : bool
-            True if a solution was found, False otherwise.
-        """
-        # base case: if board is full, return
-        if np.all(grid):
-            self.state = grid
-            return True
-
-        # this implements the least possible values heuristic - see section 3.3.2 report
-        # find the index of the cell with the least possible values
-        least_possible_values_index = np.argmax(
-            [
-                len(self.related_cells(grid, index)) if grid[index] == 0 else 0
-                for index in self.indices
-            ]
-        )
-        # pass this index to the backtrack search
-        index = self.indices[least_possible_values_index]
-
-        # only try values that are still possible given the current state of the board
-        for value in self.possible_values[index] - self.related_cells(grid, index):
-            # assign the value and recurse
-            grid[index] = value
-            if self.backtrack(grid):
-                return True
-
-            # if no solution found, reset the cell and try the next value
-            grid[index] = 0
-
-        # return False if all values have been tried without finding a solution
-        return False
 
     def save(self, filename: str) -> None:
         """
