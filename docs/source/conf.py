@@ -12,7 +12,7 @@ import sys
 sys.path.insert(0, os.path.abspath("../../src"))
 
 
-project = "Sudoku-Solver"
+project = "sudoku-py"
 copyright = "2023, Daniel Owen-Lloyd"
 author = "Daniel Owen-Lloyd"
 release = "0.1"

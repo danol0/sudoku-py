@@ -1,10 +1,8 @@
 report/*
 *.txt
 !requirements.txt
-!input.txt
 *.ipynb
 __pycache__/
-!report/report.tex
 *.md
 !README.md
 *lprof

@@ -1,6 +1,10 @@
-# sudoku-py: A python package for solving Sudoku puzzles
+# sudoku-py: Solving Sudoku with Python
 
-- [About](#about)
+## About
+This project is a lightweight python program for solving Sudoku puzzles. It using a combination of constraint propagation and brute-force search to find solutions, and can be run from the command line or imported as a package.
+
+## Contents
+
 - [Installation](#installation)
 - [Usage](#usage)
 - [Features](#features)
@@ -9,11 +13,8 @@
 - [Change log](#change-log)
 - [Credits](#credits)
 
-## About
-This project is a lightweight package for solving Sudoku puzzles. It using a combination of constraint propagation and brute-force to find solutions, and can be run from the command line or as a python module.
-
 ## Installation
-The program requires only numpy to run, with pytest used for testing as sphinx for documentation. These dependencies can be installed by running:
+The program requires only numpy to run, with pytest used for testing as sphinx for documentation. These dependencies are included in `requirements.txt` and can be installed by running:
 ```bash
 pip install -r requirements.txt
 ```
@@ -28,7 +29,7 @@ The program can be run from the command line with:
 ```bash
 python src/main.py input.txt
 ```
-where `input.txt` is a text file containing the puzzle to be solved. The input puzzle must contain exactly 81 digits or full stops, with 0s and full stops representing empty cells. All other characters will be ignored by the file loader. For example, the following are all valid inputs:
+where `input.txt` is the path to a text file containing the puzzle to be solved. The input must contain exactly 81 digits or full stops, with 0s and full stops representing empty cells. All other characters will be ignored by the file loader. For example, the following are all valid inputs:
 ```
 000|007|000
 000|009|504
@@ -55,20 +56,22 @@ python src/main.py 0030206009003050010018064000081029007000000080067082000026095
 
 The program will print the solved puzzle to the terminal, or a raise an error if there is no valid solution.
 
-### Module
+### Importing as a package
 It is also possible to use this project as a python package:
 ```python
 import sudoku
+
 state = sudoku.tools.load_initial_state("input.txt")
 board = sudoku.board.sudokuBoard(state)
 board.solve()
 ```
 The solved board can then be printed to the terminal and/or saved to a file:
 ```python
-print(board)
 board.save("output.txt")
+
+print(board)
 ```
-For more information on the classes and functions available, see the [documentation](#documentation).
+For more information on the classes and functions available, please see the [documentation](#documentation).
 
 ## Features
 ### Constraint propagation
@@ -94,7 +97,7 @@ This project can be run in a Docker container. To build the container, from the 
 ```bash
 docker build -t sudoku-py .
 ```
-To run the container, run:
+The container can then be run with:
 ```bash
 docker run -d -t --name=sudoku sudoku-py
 ```
@@ -102,12 +105,9 @@ Start a bash session in the container with:
 ```bash
 docker exec -it sudoku bash
 ```
-From here the program can be run as described above in [Command line](#command-line).
+Once in the container, running `pytest` will check if the installation is working correctly.
+From here the program can be run as described above in [Command line](#command-line) - either passing the input as a string or by first copying an input file into the container with `docker cp`.
 
-By default, the `input.txt` file in the directory will be copied to the container. To use a different puzzle, either change the contents of input.txt or change the INPUT_FILE environment variable in the Dockerfile to point to a text file of your choice:
-```dockerfile
-ENV INPUT_FILE=your_file_here.txt
-```
 
 ## Documentation
 This project uses Sphinx for documentation. To build the documentation, first install Sphinx:
@@ -121,11 +121,11 @@ sphinx-build -M html docs/source docs/build/
 The documentation can then be viewed by opening `docs/build/index.html` in a web browser.
 
 ## Change log
-- v1.0.1:
+- v1.1:
   - Improved backtracking search logic
   - Added ability to pass input as a string
   - Updated dockerfile to not run & exit on launch
-- v1.0.0:
+- v1.0:
   - Initial release
 
 ## Credits

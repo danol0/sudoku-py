@@ -56,13 +56,16 @@ def load_initial_state(input: str) -> np.ndarray:
            [8, 5, 9, 6, 1, 3, 4, 7, 2]])
     """
     # Check if the input is a file or a string
-    if os.path.isfile(input):
-        print(f"Loading initial state from file: {input}")
-        with open(input, "r") as file:
-            puzzle = file.read()
+    if isinstance(input, str):
+        if os.path.isfile(input):
+            print(f"Loading initial state from file: {input}")
+            with open(input, "r") as file:
+                puzzle = file.read()
+        else:
+            print("Loading initial state from string.")
+            puzzle = input
     else:
-        print("Loading initial state from string.")
-        puzzle = input
+        raise TypeError("Invalid input type. Please provide a file path or a string.")
 
     # Extract all digits and dots from the input & replace dots with zeros
     board = [
