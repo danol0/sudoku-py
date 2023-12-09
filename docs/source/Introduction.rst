@@ -1,13 +1,13 @@
-sudoku-py: A python package for solving Sudoku puzzles
-======================================================
+sudoku-py: Solving Sudoku with Python
+=====================================
 
 About
 -----
 
-This project is a lightweight package for solving Sudoku puzzles. It
-using a combination of constraint propagation and brute-force search to
-find solutions, and can be run from the command line or as a python
-module.
+This project is a lightweight python program for solving Sudoku puzzles.
+It using a combination of constraint propagation and brute-force search
+to find solutions, and can be run from the command line or imported as a
+package.
 
 Contents
 --------
@@ -24,8 +24,8 @@ Installation
 ------------
 
 The program requires only numpy to run, with pytest used for testing as
-sphinx for documentation. These dependencies can be installed by
-running:
+sphinx for documentation. These dependencies are included in
+``requirements.txt`` and can be installed by running:
 
 .. code:: bash
 
@@ -49,9 +49,9 @@ The program can be run from the command line with:
 
    python src/main.py input.txt
 
-where ``input.txt`` is a text file containing the puzzle to be solved.
-The input puzzle must contain exactly 81 digits or full stops, with 0s
-and full stops representing empty cells. All other characters will be
+where ``input.txt`` is the path to a text file containing the puzzle to
+be solved. The input must contain exactly 81 digits or full stops, with
+0s and full stops representing empty cells. All other characters will be
 ignored by the file loader. For example, the following are all valid
 inputs:
 
@@ -86,14 +86,15 @@ The input can also be passed directly as a string:
 The program will print the solved puzzle to the terminal, or a raise an
 error if there is no valid solution.
 
-Module
-~~~~~~
+Importing as a package
+~~~~~~~~~~~~~~~~~~~~~~
 
 It is also possible to use this project as a python package:
 
 .. code:: python
 
    import sudoku
+
    state = sudoku.tools.load_initial_state("input.txt")
    board = sudoku.board.sudokuBoard(state)
    board.solve()
@@ -103,11 +104,12 @@ file:
 
 .. code:: python
 
-   print(board)
    board.save("output.txt")
 
-For more information on the classes and functions available, see the
-`documentation <#documentation>`__.
+   print(board)
+
+For more information on the classes and functions available, please see
+the `documentation <#documentation>`__.
 
 Features
 --------
@@ -160,9 +162,9 @@ Start a bash session in the container with:
 
 Once in the container, running ``pytest`` will check if the installation
 is working correctly. From here the program can be run as described
-above in `Command line <#command-line>`__ - copying an input file into
-the container can be done with ``docker cp``, or the input can be passed
-directly as a string.
+above in `Command line <#command-line>`__ - either passing the input as
+a string or by first copying an input file into the container with
+``docker cp``.
 
 Documentation
 -------------
