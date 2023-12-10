@@ -23,7 +23,7 @@ Contents
 Installation
 ------------
 
-The program requires only numpy to run, with pytest used for testing as
+The program requires only numpy to run, with pytest used for testing and
 sphinx for documentation. These dependencies are included in
 ``requirements.txt`` and can be installed by running:
 
@@ -31,7 +31,7 @@ sphinx for documentation. These dependencies are included in
 
    pip install -r requirements.txt
 
-To run the unit tests, run:
+from the root directory. To run the unit tests, run:
 
 .. code:: bash
 
@@ -47,11 +47,45 @@ The program can be run from the command line with:
 
 .. code:: bash
 
+   python src/main.py
+
+The puzzle specified by the ``input_state`` key in the ``config.json``
+file will be loaded and solved, with the solution printed to the
+terminal.
+
+Note that the ``initial_state`` key can be either a file path to a text
+file containing the puzzle, or a string representation of the puzzle
+itself. The program will attempt to load from a file first and revert to
+a string if this fails, notifying the user if this is the case.
+
+A puzzle can also be passed as a command line argument, in which case
+the ``input_state`` in the config file will be ignored. As before, this
+argument can be either a file path:
+
+.. code:: bash
+
    python src/main.py input.txt
 
-where ``input.txt`` is the path to a text file containing the puzzle to
-be solved. The input must contain exactly 81 digits or full stops, with
-0s and full stops representing empty cells. All other characters will be
+or a string representation of the puzzle:
+
+.. code:: bash
+
+   python src/main.py 4.....8.5.3..........7......2.....6.....8.4......1.......6.3.7.5..2.....1.4......
+
+Custom arguments for the solver can also be specified in the
+``config.json`` file. The following options are available: -
+``strategy``: the strategy to use for solving the puzzle. Options are
+``auto`` (which attempts constraint propagation and then backtracking),
+``constraint_propagation`` or ``backtracking``. Default is ``auto``. -
+``max_solve_time``: the maximum time (in seconds) to spend solving the
+puzzle. Default is 60. - ``save_path``: filepath to save the solution
+to. Default is ``false``, which does not save the solution.
+
+Valid Inputs
+~~~~~~~~~~~~
+
+The input puzzle must contain exactly 81 digits or full stops, with 0s
+and full stops representing empty cells. All other characters will be
 ignored by the file loader. For example, the following are all valid
 inputs:
 
@@ -77,26 +111,22 @@ inputs:
 
    ..2.3...8.....8....31.2..../.6..5.27..1.....5.2.4.6..31./...8.6.5.......13..531.4..
 
-The input can also be passed directly as a string:
-
-.. code:: bash
-
-   python src/main.py 003020600900305001001806400008102900700000008006708200002609500800203009005010300
-
-The program will print the solved puzzle to the terminal, or a raise an
-error if there is no valid solution.
-
 Importing as a package
 ~~~~~~~~~~~~~~~~~~~~~~
 
-It is also possible to use this project as a python package:
+It is also possible to use this project as a python package. The sudoku
+package contains two modules: - ``board``: contains the sudokuBoard
+class, which contains methods for initializing and checking the validity
+of a board. - ``solver``: contains the sudokuSolver child class, which
+contains methods for solving Sudoku puzzles.
+
+Example usage:
 
 .. code:: python
 
    import sudoku
 
-   state = sudoku.tools.load_initial_state("input.txt")
-   board = sudoku.board.sudokuBoard(state)
+   board = sudoku.solver.sudokuSolver(state)
    board.solve()
 
 The solved board can then be printed to the terminal and/or saved to a
@@ -105,38 +135,50 @@ file:
 .. code:: python
 
    board.save("output.txt")
-
    print(board)
 
-For more information on the classes and functions available, please see
+For more information on the classes and methods available, please see
 the `documentation <#documentation>`__.
 
 Features
 --------
 
-Constraint propagation
-~~~~~~~~~~~~~~~~~~~~~~
+Solving strategies:
+~~~~~~~~~~~~~~~~~~~
 
-Applies logic to reduce the search space by assigning and removing
-values from cells. - If a cell has only one possible value, it must be
-that value - This value can then be removed from the possible values of
-all related cells
+Constraint propagation
+^^^^^^^^^^^^^^^^^^^^^^
+
+Applies a reasoning algorithm to reduce the search space by assigning
+and removing values from cells: - If a cell has only one possible value,
+it must be that value - This value can then be removed from the possible
+values of all related cells
 
 These steps are propagated until no further changes can be made.
 
 Backtracking search
-~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^
 
 If constraint propagation is unable to solve the puzzle, a backtracking
 search is applied to the reduced search space. Backtracking is a
-depth-first search, where board states are explored recursively. -
-Allowed values are assigned to empty cells in turn - If a valid solution
-is found, the search is complete - If no more allowed values can be
-assigned, the search backtracks to the previous state and tries a
-different value
+depth-first search, where board states are explored recursively: -
+Allowed values are assigned to empty cells in turn (in order of
+increasing number of allowed values) - If a valid solution is found, the
+search is complete - If no more allowed values can be assigned, the
+search backtracks to the previous state and tries a different value
 
 Backtracking is guaranteed to find a solution if there is one, given
 sufficient time.
+
+Other Features
+~~~~~~~~~~~~~~
+
+-  Wide range of allowed puzzle formats
+-  Detailed puzzle validation that provides relevant feedback for
+   invalid puzzles
+-  Customizable solver options
+-  Ability to save solutions to file
+-  Robust and helpful error messages
 
 Docker
 ------
@@ -169,14 +211,9 @@ a string or by first copying an input file into the container with
 Documentation
 -------------
 
-This project uses Sphinx for documentation. To build the documentation,
-first install Sphinx:
-
-.. code:: bash
-
-   pip install sphinx
-
-Then, from the root directory of the project, run:
+This project uses Sphinx for documentation, which is included in the
+requirements.txt. To build the documentation, from the root directory of
+the project run:
 
 .. code:: bash
 
@@ -188,6 +225,14 @@ The documentation can then be viewed by opening
 Change log
 ----------
 
+-  v1.2:
+
+   -  Solve functionality is now contained in a child class of
+      sudokuBoard
+   -  Updated main.py to use config file
+   -  Custom solver options can now be specified in config file or on
+      object initialization
+
 -  v1.1:
 
    -  Improved backtracking search logic
@@ -197,6 +242,7 @@ Change log
 -  v1.0:
 
    -  Initial release
+   -  Added constraint propagation and backtracking search
 
 Credits
 -------

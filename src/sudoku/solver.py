@@ -5,12 +5,12 @@ import time
 
 class sudokuSolver(sudokuBoard):
     """
-    This class defines a solver object with methods for solving Sudoku puzzles.
+    Child class of sudokuBoard that contains methods for solving puzzles.
 
     Parameters
     ----------
     initial_state : str or numpy.ndarray[int] or list[list[int]]
-        The initial state of the board.
+        The initial state of the board. Can be provided as a string, a file path, or a 9x9 array.
 
     strategy : str, optional
         The strategy to use for solving the puzzle. Options are 'auto' (which tries constraint propagation
@@ -188,8 +188,8 @@ class sudokuSolver(sudokuBoard):
         ----
         If a solution is found, the state attribute is updated to the solved board.
 
-        Args
-        ----
+        Parameters
+        ----------
         grid : numpy.ndarray
             The board state to search.
 

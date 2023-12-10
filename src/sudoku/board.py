@@ -5,7 +5,7 @@ import os
 
 class sudokuBoard:
     """
-    This class contains methods for initializing and checking the validity of a Sudoku board.
+    General class for representing a Sudoku board with methods for initializing, printing and saving.
 
     Parameters
     ----------
@@ -47,38 +47,38 @@ class sudokuBoard:
 
     Load the initial state from a string:
 
-    >>> board = sudokuBoard("594167832618239574237458169981726345375841296426395781762584913143972658859613472")
+    >>> board = sudokuBoard("365427819487931526129856374852793641613248957974165283241389765538674192796512438")
     Loading initial state from string.
 
     Initialize directly with an array:
 
     >>> initial_state = [
-        [0, 0, 3, 0, 2, 0, 6, 0, 0],
-        [9, 0, 0, 3, 0, 5, 0, 0, 1],
-        [0, 0, 1, 8, 0, 6, 4, 0, 0],
-        [0, 0, 8, 1, 0, 2, 9, 0, 0],
-        [7, 0, 0, 0, 0, 0, 0, 0, 8],
-        [0, 0, 6, 7, 0, 8, 2, 0, 0],
-        [0, 0, 2, 6, 0, 9, 5, 0, 0],
-        [8, 0, 0, 2, 0, 3, 0, 0, 9],
-        [0, 0, 5, 0, 1, 0, 3, 0, 0]
+        [3, 6, 5, 4, 2, 7, 8, 1, 9],
+        [4, 8, 7, 9, 3, 1, 5, 2, 6],
+        [1, 2, 9, 8, 5, 6, 3, 7, 4],
+        [8, 5, 2, 7, 9, 3, 6, 4, 1],
+        [6, 1, 3, 2, 4, 8, 9, 5, 7],
+        [9, 7, 4, 1, 6, 5, 2, 8, 3],
+        [2, 4, 1, 3, 8, 9, 7, 6, 5],
+        [5, 3, 8, 6, 7, 4, 1, 9, 2],
+        [7, 9, 6, 5, 1, 2, 4, 3, 8]
     ]
     >>> board = sudokuBoard(initial_state)
 
     The board can be printed in a readable format:
 
     >>> print(board)
-    483|921|657
-    967|345|821
-    251|876|493
+    365|427|819
+    487|931|526
+    129|856|374
     ---+---+---
-    548|132|976
-    729|564|138
-    136|798|245
+    852|793|641
+    613|248|957
+    974|165|283
     ---+---+---
-    372|689|514
-    814|253|769
-    695|417|382
+    241|389|765
+    538|674|192
+    796|512|438
 
     The board in its current state can be saved to a file:
 
@@ -98,12 +98,17 @@ class sudokuBoard:
         [0, 0, 0, 0, 0, 0, 0, 0, 0]
     ]
     >>> board = sudokuBoard(invalid_state)
-    ValueError: The cell in row 2 and column 7 has no possible values. This puzzle has no solutions.
+    ValueError: This puzzle is invalid as the cell in row 2 and column 7 has no possible values.
 
     Valid puzzles with multiple solutions will raise a warning:
 
     >>> board = sudokuBoard("........................................1........................................")
     WARNING: The puzzle has multiple solutions.
+
+    Initializing a completed board with a contradiction will raise an error:
+
+    >>> board = sudokuBoard("594167832618239574237458169981726345375841296426395781762584913143972658859613472")
+    ValueError: This board is invalid as the cell in row 1 and column 9 is a contradiction.
     """
 
     def __init__(self, initial_state: str | np.ndarray | list[list[int]]) -> None:
@@ -116,14 +121,14 @@ class sudokuBoard:
             initial_state = self.load_initial_state(initial_state)
 
         # convert initial state to numpy array if necessary
-        if isinstance(initial_state, list):
+        elif isinstance(initial_state, list):
             try:
                 initial_state = np.array(initial_state)
             except TypeError:
                 raise TypeError("Error converting initial state to numpy array.")
 
         # the following checks ensure that the initial state is a 9x9 array of integers
-        if not isinstance(initial_state, np.ndarray):
+        elif not isinstance(initial_state, np.ndarray):
             raise TypeError("Initializing board with an object of incorrect type.")
 
         if initial_state.shape != (9, 9):
@@ -153,7 +158,7 @@ class sudokuBoard:
 
     def __str__(self) -> str:
         """
-        Prints the board state in a readable format.
+        Readable string representation of the board.
 
         Returns
         -------
@@ -196,11 +201,10 @@ class sudokuBoard:
 
         # Check if the input is a file or a string
         if os.path.isfile(input):
-            print(f"Loading initial state from file: {input}")
             with open(input, "r") as file:
                 puzzle = file.read()
         else:
-            print("Loading initial state from string.")
+            print("No file was found at specified input, treating as a puzzle string.")
             puzzle = input
 
         # Extract all digits and dots from the input & replace dots with zeros
@@ -239,9 +243,20 @@ class sudokuBoard:
                 # if no possible values, the board is invalid
                 if self.possible_values[index] == set():
                     raise ValueError(
-                        f"The cell in row {index[0]+1} and column {index[1]+1} has no possible values. "
-                        "This puzzle has no solutions."
+                        f"This puzzle is invalid as the cell in row {index[0]+1} and column {index[1]+1} "
+                        "has no possible values."
                     )
+
+        # for a complete board, check for contradictions
+        if np.all(self.state):
+            for index in self.indices:
+                if self.state[index] in self.related_cells(self.state, index):
+                    raise ValueError(
+                        f"This board is invalid as the cell in row {index[0]+1} and column {index[1]+1} "
+                        "is a contradiction."
+                    )
+
+        return True
 
     def related_cells(self, grid: np.ndarray, index: tuple) -> set:
         """
@@ -250,7 +265,6 @@ class sudokuBoard:
         Note
         ----
         Related cells are those in the same row, column, or box as the given cell.
-        The returned set includes the contents of the given cell.
 
         Parameters
         ----------
@@ -270,22 +284,28 @@ class sudokuBoard:
         box_row = row // 3 * 3
         box_col = col // 3 * 3
 
+        # create a temporary copy of the grid
+        masked_grid = np.copy(grid)
+
+        # mask the cell at the given index in the temporary grid
+        masked_grid[row, col] = 0
+
         related = {
-            *grid[row, :],
-            *grid[:, col],
-            *grid[box_row : box_row + 3, box_col : box_col + 3].flatten(),
+            *masked_grid[row, :],
+            *masked_grid[:, col],
+            *masked_grid[box_row : box_row + 3, box_col : box_col + 3].flatten(),
         }
 
         return related
 
-    def save(self, filename: str) -> None:
+    def save(self, filepath: str) -> None:
         """
         Saves the current state of the board to a file.
 
         Parameters
         ----------
-        filename : str
-            The name of the file to save to.
+        filepath : str
+            The filepath to save the board to.
         """
-        with open(filename, "w") as file:
+        with open(filepath, "w") as file:
             file.write(str(self))

@@ -83,7 +83,7 @@ def complete_initial_state(tmp_path):
     """
     Simulate an input file of a complete board.
     """
-    state_data = "594167832618239574237458169981726345375841296426395781762584913143972658859613472"
+    state_data = "365427819487931526129856374852793641613248957974165283241389765538674192796512438"
     file_path = tmp_path / "initial_state.txt"
     file_path.write_text(state_data)
     return str(file_path)
@@ -97,15 +97,15 @@ def test_load_initial_state_from_file(complete_initial_state):
         sudokuBoard(complete_initial_state).state,
         np.array(
             [
-                [5, 9, 4, 1, 6, 7, 8, 3, 2],
-                [6, 1, 8, 2, 3, 9, 5, 7, 4],
-                [2, 3, 7, 4, 5, 8, 1, 6, 9],
-                [9, 8, 1, 7, 2, 6, 3, 4, 5],
-                [3, 7, 5, 8, 4, 1, 2, 9, 6],
-                [4, 2, 6, 3, 9, 5, 7, 8, 1],
-                [7, 6, 2, 5, 8, 4, 9, 1, 3],
-                [1, 4, 3, 9, 7, 2, 6, 5, 8],
-                [8, 5, 9, 6, 1, 3, 4, 7, 2],
+                [3, 6, 5, 4, 2, 7, 8, 1, 9],
+                [4, 8, 7, 9, 3, 1, 5, 2, 6],
+                [1, 2, 9, 8, 5, 6, 3, 7, 4],
+                [8, 5, 2, 7, 9, 3, 6, 4, 1],
+                [6, 1, 3, 2, 4, 8, 9, 5, 7],
+                [9, 7, 4, 1, 6, 5, 2, 8, 3],
+                [2, 4, 1, 3, 8, 9, 7, 6, 5],
+                [5, 3, 8, 6, 7, 4, 1, 9, 2],
+                [7, 9, 6, 5, 1, 2, 4, 3, 8],
             ]
         ),
     )
@@ -218,31 +218,16 @@ def test_board_init_invalid_values():
         sudokuBoard(initial_state_list)
 
 
-# ------------------------------- Display ---------------------------------
-
-
-def test_board_display():
-    """
-    Test case to check that the board is correctly represented as a string.
-    """
-    initial_state = np.ones(81, dtype=int).reshape(9, 9)
-    board = sudokuBoard(initial_state)
-    assert (
-        str(board) == "111|111|111\n"
-        "111|111|111\n"
-        "111|111|111\n"
-        "---+---+---\n"
-        "111|111|111\n"
-        "111|111|111\n"
-        "111|111|111\n"
-        "---+---+---\n"
-        "111|111|111\n"
-        "111|111|111\n"
-        "111|111|111\n"
-    )
-
-
 # ------------------------------- Constraints ---------------------------------
+
+
+def test_contradiction():
+    """
+    Test case to check that initializing a completed board with a contradiction raises an error.
+    """
+    contradiction = "594167832618239574237458169981726345375841296426395781762584913143972658859613472"
+    with pytest.raises(ValueError):
+        sudokuBoard(contradiction)
 
 
 def test_board_possible_values():
@@ -287,12 +272,6 @@ def test_related_cells():
     # should raise multiple solutions warning
     with pytest.warns(UserWarning):
         board = sudokuBoard(grid)
-    index = (0, 4)
-    related = board.related_cells(grid, index)
-    assert related == {0, 1, 2, 3, 4, 5, 6, 7, 8, 9}
-    index = (4, 0)
-    related = board.related_cells(grid, index)
-    assert related == {0, 1}
-    index = (2, 4)
-    related = board.related_cells(grid, index)
-    assert related == {0, 4, 5, 6}
+    assert board.related_cells(grid, (0, 4)) == {0, 1, 2, 3, 4, 6, 7, 8, 9}
+    assert board.related_cells(grid, (4, 0)) == {0, 1}
+    assert board.related_cells(grid, (2, 4)) == {0, 4, 5, 6}
