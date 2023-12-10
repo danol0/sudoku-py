@@ -1,5 +1,5 @@
-Welcome to sudoku-py's documentation
-====================================
+sudoku-py: Solving Sudoku with Python
+=====================================
 
 .. toctree::
    :maxdepth: 2
@@ -7,7 +7,7 @@ Welcome to sudoku-py's documentation
 
    Introduction
    board
-   tools
+   solver
 
 Indices and tables
 ==================

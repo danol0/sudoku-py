@@ -8,6 +8,7 @@ RUN mkdir app
 COPY requirements.txt app
 COPY src app/src
 COPY test app/test
+COPY config.json app
 
 WORKDIR /app
 RUN pip install -r requirements.txt
