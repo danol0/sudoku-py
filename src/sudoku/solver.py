@@ -12,6 +12,19 @@ class sudokuSolver(sudokuBoard):
     initial_state : str or numpy.ndarray[int] or list[list[int]]
         The initial state of the board.
 
+    strategy : str, optional
+        The strategy to use for solving the puzzle. Options are 'auto' (which tries constraint propagation
+        and then backtracking), 'constraint_propagation', and 'backtracking'.
+        The default is 'auto'.
+
+    max_solve_time : float, optional
+        The maximum time in seconds to spend solving the puzzle. The default is 60.
+
+    Attributes
+    ----------
+    start : float
+        The time at which the solve method was called.
+
     Methods
     -------
     solve()
@@ -49,16 +62,36 @@ class sudokuSolver(sudokuBoard):
     143|972|658
     859|613|472
 
-    A value error is raised if no solutions exist:
+    A value error is raised if no solutions exist (Note: requires a strategy that includes backtracking):
 
     >>> board = sudokuSolver("invalid.txt")
     Loading initial state from file: invalid.txt
     >>> board.solve()
-    ValueError: No solutions exist for this puzzle. Search took 0.002 seconds.
+    ValueError: No solutions exist for this puzzle. Search took 0.012 seconds.
     """
 
-    def __init__(self, initial_state: str | np.ndarray | list[list[int]]) -> None:
+    def __init__(
+        self,
+        initial_state: str | np.ndarray | list[list[int]],
+        strategy: str = "auto",
+        max_solve_time: int | float = 60,
+    ) -> None:
+
         super().__init__(initial_state)
+
+        # check that the strategy is valid
+        if strategy not in ["auto", "constraint_propagation", "backtracking"]:
+            raise ValueError(
+                "Invalid strategy. Options are 'auto', 'constraint_propagation', and 'backtracking'."
+            )
+
+        # check that the max_solve_time is valid
+        if not isinstance(max_solve_time, (int, float)) or max_solve_time <= 0:
+            raise ValueError("Invalid max_solve_time. Must be greater than zero.")
+
+        self.strategy = strategy
+        self.max_solve_time = max_solve_time
+        self.start = None
 
     def solve(self) -> bool:
         """
@@ -74,25 +107,43 @@ class sudokuSolver(sudokuBoard):
         ValueError
             If no solutions exist for the puzzle. The search time is included in the error message.
         """
-        start = time.time()
+        # check if the board is already solved
+        # we know that it is valid as this is checked on init
+        if np.all(self.state):
+            print("The board is already solved.")
+            return True
 
-        if self.propagate_constraints():
-            end = time.time()
+        # start the timer
+        self.start = time.time()
+
+        if (
+            self.strategy in ["auto", "constraint_propagation"]
+            and self.propagate_constraints()
+        ):
             print(
-                f"The puzzle was solved by constraint propagation in {end - start:.3} seconds."
+                f"The puzzle was solved by constraint propagation in {time.time() - self.start:.3} seconds."
             )
             return True
 
-        elif self.backtrack(self.state):
-            end = time.time()
-            print(f"The puzzle was solved by brute force in {end - start:.3} seconds")
+        elif self.strategy in ["auto", "backtracking"] and self.backtrack(self.state):
+            print(
+                f"The puzzle was solved by backtracking in {time.time() - self.start:.3} seconds"
+            )
             return True
 
+        elif time.time() - self.start < self.max_solve_time:
+            if self.strategy == "constraint_propagation":
+                print("The puzzle could not be solved by constraint propagation alone.")
+            else:
+                # if backtracking fails, no solutions exist
+                raise ValueError(
+                    f"No solutions exist for this puzzle. Search took {time.time() - self.start:.3} seconds."
+                )
+
         else:
-            # if backtracking fails, no solutions exist
-            end = time.time()
-            raise ValueError(
-                f"No solutions exist for this puzzle. Search took {end - start:.3} seconds."
+            print(
+                f"Time limit of {self.max_solve_time:.1f} seconds reached, "
+                "consider increasing the max solve time."
             )
 
     def propagate_constraints(self) -> bool:
@@ -112,6 +163,10 @@ class sudokuSolver(sudokuBoard):
         # if board is full, return
         if np.all(self.state):
             return True
+
+        # if max time exceeded, return
+        if time.time() - self.start >= self.max_solve_time:
+            return False
 
         # update possible values for the current state
         self.update_possible_values()
@@ -147,6 +202,10 @@ class sudokuSolver(sudokuBoard):
         if np.all(grid):
             self.state = grid
             return True
+
+        # if max time exceeded, return
+        if time.time() - self.start >= self.max_solve_time:
+            return False
 
         # this implements the least possible values heuristic - see section 3.3.2 report
         # find the index of the cell with the least possible values

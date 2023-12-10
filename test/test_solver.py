@@ -141,19 +141,79 @@ def test_board_backtrack():
     The initial state is not solvable through constraints alone. The function checks that the
     solve method returns True, indicating that backtracking was required to solve the board.
     """
-    initial_state = np.array(
-        [
-            [0, 0, 0, 0, 0, 7, 0, 0, 0],
-            [0, 0, 0, 0, 0, 9, 5, 0, 4],
-            [0, 0, 0, 0, 5, 0, 1, 6, 9],
-            [0, 8, 0, 0, 0, 0, 3, 0, 5],
-            [0, 7, 5, 0, 0, 0, 2, 9, 0],
-            [4, 0, 6, 0, 0, 0, 0, 8, 0],
-            [7, 6, 2, 0, 8, 0, 0, 0, 0],
-            [1, 0, 3, 9, 0, 0, 0, 0, 0],
-            [0, 0, 0, 6, 0, 0, 0, 0, 0],
-        ]
-    )
-    board = sudokuSolver(initial_state)
-    assert not board.propagate_constraints()  # not solvable through constraints alone
-    assert board.solve()  # thus backtracking is required
+    board = sudokuSolver(hidden_singles, strategy="constraint_propagation")
+    assert not board.solve()
+    board = sudokuSolver(hidden_singles, strategy="backtracking")
+    assert board.solve()
+    board = sudokuSolver(hidden_singles, strategy="auto")
+    assert board.solve()
+
+
+def test_board_constraint_propagation():
+    """
+    Test case to check that the board is solved through constraint propagation.
+
+    The initial state is solvable through constraints alone.
+    """
+    constraints = "..3.2.6..9..3.5..1..18.64....81.29..7.......8..67.82....26.95..8..2.3..9..5.1.3.."
+    board = sudokuSolver(constraints, strategy="constraint_propagation")
+    assert board.solve()
+
+
+def test_board_timeout():
+    """
+    Test case to check that the board times out.
+
+    The initial state is not solvable within the time limit.
+    """
+    board = sudokuSolver(hidden_singles, max_solve_time=0.000001)
+    assert not board.solve()
+    board = sudokuSolver(hidden_singles, max_solve_time=60)
+    assert board.solve()
+
+
+# ------------------------------ Test cases for __init__ ------------------------------
+
+
+def test_solver_init_valid_strategy():
+    """
+    Test case to verify that the solver initializes with a valid strategy.
+    """
+    initial_state = hidden_singles
+    strategy = "auto"
+    max_solve_time = 60
+    solver = sudokuSolver(initial_state, strategy, max_solve_time)
+    assert solver.strategy == strategy
+
+
+def test_solver_init_invalid_strategy():
+    """
+    Test case to verify that the solver raises a ValueError for an invalid strategy.
+    """
+    initial_state = hidden_singles
+    strategy = "invalid_strategy"
+    max_solve_time = 60
+    with pytest.raises(ValueError):
+        sudokuSolver(initial_state, strategy, max_solve_time)
+
+
+def test_solver_init_valid_max_solve_time():
+    """
+    Test case to verify that the solver initializes with a valid max_solve_time.
+    """
+    initial_state = hidden_singles
+    strategy = "auto"
+    max_solve_time = 60
+    solver = sudokuSolver(initial_state, strategy, max_solve_time)
+    assert solver.max_solve_time == max_solve_time
+
+
+def test_solver_init_invalid_max_solve_time():
+    """
+    Test case to verify that the solver raises a ValueError for an invalid max_solve_time.
+    """
+    initial_state = hidden_singles
+    strategy = "auto"
+    max_solve_time = -1
+    with pytest.raises(ValueError):
+        sudokuSolver(initial_state, strategy, max_solve_time)
