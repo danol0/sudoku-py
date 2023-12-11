@@ -76,6 +76,9 @@ class sudokuSolver(sudokuBoard):
         strategy: str = "auto",
         max_solve_time: int | float = 60,
     ) -> None:
+        """
+        Initializes the sudokuSolver object, making use of the input validation in the parent class.
+        """
 
         super().__init__(initial_state)
 
@@ -92,59 +95,6 @@ class sudokuSolver(sudokuBoard):
         self.strategy = strategy
         self.max_solve_time = max_solve_time
         self.start = None
-
-    def solve(self) -> bool:
-        """
-        Attempts to solve the board by calling constraint propagation and then backtracking.
-
-        Returns
-        -------
-        solved : bool
-            True if the board was solved, False if no solutions exist.
-
-        Raises
-        ------
-        ValueError
-            If no solutions exist for the puzzle. The search time is included in the error message.
-        """
-        # check if the board is already solved
-        # we know that it is valid as this is checked on init
-        if np.all(self.state):
-            print("The board is already solved.")
-            return True
-
-        # start the timer
-        self.start = time.time()
-
-        if (
-            self.strategy in ["auto", "constraint_propagation"]
-            and self.propagate_constraints()
-        ):
-            print(
-                f"The puzzle was solved by constraint propagation in {time.time() - self.start:.3} seconds."
-            )
-            return True
-
-        elif self.strategy in ["auto", "backtracking"] and self.backtrack(self.state):
-            print(
-                f"The puzzle was solved by backtracking in {time.time() - self.start:.3} seconds"
-            )
-            return True
-
-        elif time.time() - self.start < self.max_solve_time:
-            if self.strategy == "constraint_propagation":
-                print("The puzzle could not be solved by constraint propagation alone.")
-            else:
-                # if backtracking fails, no solutions exist
-                raise ValueError(
-                    f"No solutions exist for this puzzle. Search took {time.time() - self.start:.3} seconds."
-                )
-
-        else:
-            print(
-                f"Time limit of {self.max_solve_time:.1f} seconds reached, "
-                "consider increasing the max solve time."
-            )
 
     def propagate_constraints(self) -> bool:
         """
@@ -180,18 +130,9 @@ class sudokuSolver(sudokuBoard):
         # return False once propagation is complete
         return False
 
-    def backtrack(self, grid: np.ndarray) -> bool:
+    def backtrack(self) -> bool:
         """
-        Recursive, depth-first search on the given board state.
-
-        Note
-        ----
-        If a solution is found, the state attribute is updated to the solved board.
-
-        Parameters
-        ----------
-        grid : numpy.ndarray
-            The board state to search.
+        Recursive, depth-first search on the board state.
 
         Returns
         -------
@@ -199,34 +140,90 @@ class sudokuSolver(sudokuBoard):
             True if a solution was found, False otherwise.
         """
         # base case: if board is full, return
-        if np.all(grid):
-            self.state = grid
+        if np.all(self.state):
             return True
 
         # if max time exceeded, return
         if time.time() - self.start >= self.max_solve_time:
             return False
 
-        # this implements the least possible values heuristic - see section 3.3.2 report
-        # find the index of the cell with the least possible values
+        # this implements the MRV heuristic - see section 3.1.1 of report
+        # find the index of the cell with the fewest possible values and search
         least_possible_values_index = np.argmax(
             [
-                len(self.related_cells(grid, index)) if grid[index] == 0 else 0
+                len(self.related_cells(self.state, index))
+                if self.state[index] == 0
+                else 0
                 for index in self.indices
             ]
         )
-        # pass this index to the backtrack search
         index = self.indices[least_possible_values_index]
 
-        # only try values that are still possible given the current state of the board
-        for value in self.possible_values[index] - self.related_cells(grid, index):
+        for value in self.possible_values[index] - self.related_cells(
+            self.state, index
+        ):
             # assign the value and recurse
-            grid[index] = value
-            if self.backtrack(grid):
+            self.state[index] = value
+            if self.backtrack():
                 return True
 
             # if no solution found, reset the cell and try the next value
-            grid[index] = 0
+            self.state[index] = 0
 
         # return False if all values have been tried without finding a solution
         return False
+
+    def solve(self) -> bool:
+        """
+        Attempts to solve the board by calling constraint propagation and then backtracking.
+
+        Returns
+        -------
+        solved : bool
+            True if the board was solved, False if no solutions exist.
+
+        Raises
+        ------
+        ValueError
+            If no solutions exist for the puzzle. The search time is included in the error message.
+        """
+        # check if the board is already solved
+        if np.all(self.state):
+            print("The board is already solved.")
+            return True
+
+        # start the timer
+        self.start = time.time()
+
+        # call each strategy if enabled
+        if self.strategy != "backtracking" and self.propagate_constraints():
+            print(
+                f"The puzzle was solved by constraint propagation in {time.time() - self.start:.3} seconds."
+            )
+            return True
+        elif self.strategy != "constraint_propagation" and self.backtrack():
+            print(
+                f"The puzzle was solved by backtracking in {time.time() - self.start:.3} seconds"
+            )
+            return True
+
+        # If the puzzle is not solved, check why:
+        # 1: Using only constraint propagation could not solve the puzzle
+        elif time.time() - self.start < self.max_solve_time:
+            if self.strategy == "constraint_propagation":
+                print(
+                    "The puzzle could not be solved by constraint propagation alone, consider backtracking."
+                )
+                return False
+            # 2: No solutions exist for the puzzle
+            else:
+                raise ValueError(
+                    f"No solutions exist for this puzzle. Search took {time.time() - self.start:.3} seconds."
+                )
+        # 3: The max solve time was exceeded
+        else:
+            print(
+                f"Time limit of {self.max_solve_time:.1f} seconds reached, "
+                "consider increasing the max solve time."
+            )
+            return False

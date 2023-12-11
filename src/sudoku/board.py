@@ -26,7 +26,7 @@ class sudokuBoard:
     Raises
     ------
     ValueError :
-        If the initial state is not a 9x9 array or contains invalid values.
+        If the initial state is invalid.
 
     Returns
     -------
@@ -116,18 +116,18 @@ class sudokuBoard:
         Initializes the board object from the specified initial state. Loads directly from array like objects,
         or uses the load_initial_state method to parse strings and file paths.
         """
-        # use load_initial_state method to parse input if given as a string or file path
+        # Use load_initial_state method to parse input if given as a string or file path
         if isinstance(initial_state, str):
             initial_state = self.load_initial_state(initial_state)
 
-        # convert initial state to numpy array if necessary
+        # Convert initial state to numpy array if necessary
         elif isinstance(initial_state, list):
             try:
                 initial_state = np.array(initial_state)
             except TypeError:
                 raise TypeError("Error converting initial state to numpy array.")
 
-        # the following checks ensure that the initial state is a 9x9 array of integers
+        # The following checks ensure that the initial state is a 9x9 array of integers
         elif not isinstance(initial_state, np.ndarray):
             raise TypeError("Initializing board with an object of incorrect type.")
 
@@ -143,11 +143,11 @@ class sudokuBoard:
         if np.logical_or(initial_state < 0, initial_state > 9).any():
             raise ValueError("Initializing board with array containing invalid values.")
 
-        # puzzles with less than 17 clues have multiple solutions. source: https://arxiv.org/abs/2305.01697
+        # Puzzles with less than 17 clues have multiple solutions. source: https://arxiv.org/abs/2305.01697
         if np.count_nonzero(initial_state) < 17:
             warnings.warn("WARNING: The puzzle has multiple solutions.")
 
-        # initialize indices and state attributes
+        # Initialize indices and state attributes
         self.indices = [(i, j) for i in range(9) for j in range(9)]
         self.state = initial_state
 
@@ -198,13 +198,15 @@ class sudokuBoard:
         ValueError :
             If the input does not contain exactly 81 digits & dots.
         """
+        # Flag to help with informative error messages
+        from_file = True
 
         # Check if the input is a file or a string
         if os.path.isfile(input):
             with open(input, "r") as file:
                 puzzle = file.read()
         else:
-            print("No file was found at specified input, treating as a puzzle string.")
+            from_file = False
             puzzle = input
 
         # Extract all digits and dots from the input & replace dots with zeros
@@ -214,11 +216,18 @@ class sudokuBoard:
             if char.isdigit() or char == "."
         ]
 
-        # Check that the extracted board is of the correct size
+        # Validate the board
         if len(board) != 81:
-            raise ValueError(
-                "Please check the input: must contain exactly 81 digits & full stops."
-            )
+            if from_file:
+                raise ValueError(
+                    f'File "{input}" contains {len(board)} digits & full stops, but expected 81. '
+                    "Please check the file and try again."
+                )
+            else:
+                raise ValueError(
+                    f'No file found at "{input}", so attempted to load as a puzzle string. '
+                    f"Found {len(board)} digits & full stops, but expected 81."
+                )
 
         return np.array(board).reshape((9, 9))
 
@@ -232,24 +241,25 @@ class sudokuBoard:
 
         Raises
         ------
-        ValueError
-            If a cell has no possible values, so the board is invalid.
+        ValueError :
+            For invalid boards.
         """
-        # for empty cells, remove values in related cells from the possible values
+        # For empty cells, remove values in related cells from the possible values
         for index in self.indices:
             if self.state[index] == 0:
                 self.possible_values[index] -= self.related_cells(self.state, index)
 
-                # if no possible values, the board is invalid
-                if self.possible_values[index] == set():
+                # If no possible values, the board is invalid
+                if not self.possible_values[index]:
                     raise ValueError(
                         f"This puzzle is invalid as the cell in row {index[0]+1} and column {index[1]+1} "
                         "has no possible values."
                     )
 
-        # for a complete board, check for contradictions
+        # For a complete board, check for contradictions
         if np.all(self.state):
             for index in self.indices:
+                # If the cell value is in the related cells, the board is invalid
                 if self.state[index] in self.related_cells(self.state, index):
                     raise ValueError(
                         f"This board is invalid as the cell in row {index[0]+1} and column {index[1]+1} "
@@ -280,14 +290,12 @@ class sudokuBoard:
             The set of values in all related cells.
         """
         row, col = index
-        # calculate the index of the top left cell in the box containing the given cell
+        # Calculate the index of the top left cell in the box containing the given cell
         box_row = row // 3 * 3
         box_col = col // 3 * 3
 
-        # create a temporary copy of the grid
+        # Mask the cell at the given index
         masked_grid = np.copy(grid)
-
-        # mask the cell at the given index in the temporary grid
         masked_grid[row, col] = 0
 
         related = {

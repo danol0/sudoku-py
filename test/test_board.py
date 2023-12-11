@@ -78,6 +78,7 @@ def test_board_init_with_string():
         )
 
 
+# Using pytest fixtures to test loading from file
 @pytest.fixture
 def complete_initial_state(tmp_path):
     """

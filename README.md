@@ -1,4 +1,4 @@
-# sudoku-py: Solving Sudoku with Python
+# sudoku-py: A Python Package for Solving Sudoku Puzzles
 
 ## About
 This project is a lightweight python program for solving Sudoku puzzles. It using a combination of constraint propagation and brute-force search to find solutions, and can be run from the command line or imported as a package.
