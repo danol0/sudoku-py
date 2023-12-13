@@ -68,6 +68,13 @@ class sudokuSolver(sudokuBoard):
     Loading initial state from file: invalid.txt
     >>> board.solve()
     ValueError: No solutions exist for this puzzle. Search took 0.012 seconds.
+
+    Solve strategy and timeout can be specified:
+
+    >>> board = sudokuSolver("input.txt", strategy="constraint_propagation", max_solve_time=1)
+    Loading initial state from file: input.txt
+    >>> board.solve()
+    The puzzle could not be solved by constraint propagation alone, consider backtracking.
     """
 
     def __init__(
@@ -77,18 +84,17 @@ class sudokuSolver(sudokuBoard):
         max_solve_time: int | float = 60,
     ) -> None:
         """
-        Initializes the sudokuSolver object, making use of the input validation in the parent class.
+        Initializes the sudokuSolver object using of the input validation of the parent class.
         """
 
         super().__init__(initial_state)
 
-        # check that the strategy is valid
+        # Check that the strategy and max_solve_time are valid
         if strategy not in ["auto", "constraint_propagation", "backtracking"]:
             raise ValueError(
                 "Invalid strategy. Options are 'auto', 'constraint_propagation', and 'backtracking'."
             )
 
-        # check that the max_solve_time is valid
         if not isinstance(max_solve_time, (int, float)) or max_solve_time <= 0:
             raise ValueError("Invalid max_solve_time. Must be greater than zero.")
 
@@ -110,24 +116,22 @@ class sudokuSolver(sudokuBoard):
         solved : bool
             True if the board is complete, False otherwise.
         """
-        # if board is full, return
+        # If board is full, or max time exceeded, return
         if np.all(self.state):
             return True
 
-        # if max time exceeded, return
         if time.time() - self.start >= self.max_solve_time:
             return False
 
-        # update possible values for the current state
         self.update_possible_values()
 
+        # If cell has only one possible value, assign it and propagate
         for index in self.indices:
-            # if cell has only one possible value, assign it and propagate
             if len(self.possible_values[index]) == 1:
                 self.state[index] = self.possible_values[index].pop()
                 return self.propagate_constraints()
 
-        # return False once propagation is complete
+        # Return False once propagation is complete
         return False
 
     def backtrack(self) -> bool:
@@ -139,35 +143,30 @@ class sudokuSolver(sudokuBoard):
         solved : bool
             True if a solution was found, False otherwise.
         """
-        # base case: if board is full, return
+        # If board is full or max time exceeded, return
         if np.all(self.state):
             return True
 
-        # if max time exceeded, return
         if time.time() - self.start >= self.max_solve_time:
             return False
 
-        # this implements the MRV heuristic - see section 3.1.1 of report
-        # find the index of the cell with the fewest possible values and search
+        # This implements the MRV heuristic - see section 3.1.1 of report
+        # Find the index of the cell with the fewest possible values and search
         least_possible_values_index = np.argmax(
             [
-                len(self.related_cells(self.state, index))
-                if self.state[index] == 0
-                else 0
+                len(self.related_cells(index)) if self.state[index] == 0 else 0
                 for index in self.indices
             ]
         )
         index = self.indices[least_possible_values_index]
 
-        for value in self.possible_values[index] - self.related_cells(
-            self.state, index
-        ):
-            # assign the value and recurse
+        # Assign legal values and recurse
+        for value in self.possible_values[index] - self.related_cells(index):
             self.state[index] = value
             if self.backtrack():
                 return True
 
-            # if no solution found, reset the cell and try the next value
+            # If no solution found, reset the cell and try the next value
             self.state[index] = 0
 
         # return False if all values have been tried without finding a solution
@@ -187,15 +186,15 @@ class sudokuSolver(sudokuBoard):
         ValueError
             If no solutions exist for the puzzle. The search time is included in the error message.
         """
-        # check if the board is already solved
+        # Check if the board is already solved
         if np.all(self.state):
             print("The board is already solved.")
             return True
 
-        # start the timer
+        # Start the timer
         self.start = time.time()
 
-        # call each strategy if enabled
+        # Call each strategy if enabled
         if self.strategy != "backtracking" and self.propagate_constraints():
             print(
                 f"The puzzle was solved by constraint propagation in {time.time() - self.start:.3} seconds."
