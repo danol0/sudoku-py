@@ -24,13 +24,20 @@ def load_config():
         raise FileNotFoundError(
             "Config file not found. Please create a config.json file in the root directory."
         )
+    # Check that the config file has all the required fields
+    required_fields = ["initial_state", "strategy", "max_solve_time", "save_path"]
+    for field in required_fields:
+        if field not in config:
+            raise KeyError(
+                f"Config file is missing {field} field. Please add it to the config file."
+            )
 
     return config
 
 
 def main():
     """
-    Main entry point of the script.
+    Main entry point of the script. Loads the config, initializes the solver, and solves the puzzle.
     """
     # Load the configuration
     config = load_config()
@@ -38,7 +45,7 @@ def main():
     # Overwrite the config puzzle if user has specified one via the command line
     if len(sys.argv) == 2:
         initial_state = sys.argv[1]
-        print("Loading puzzle from command line argument")
+        print("Loading puzzle from command line argument...")
     elif len(sys.argv) > 2:
         raise ValueError(
             "Too many arguments provided. Accepts one argument, the path to the puzzle file, "
@@ -46,7 +53,7 @@ def main():
         )
     else:
         initial_state = config["initial_state"]
-        print("Loading puzzle from config file")
+        print("Loading puzzle from config file...")
 
     # Initialize the solver
     board = sudokuSolver(
