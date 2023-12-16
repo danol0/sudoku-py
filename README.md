@@ -23,10 +23,11 @@ or
 pip install -r requirements.txt
 ```
 depending on your preferred package manager.
-To run the unit tests, run:
+Running the unit tests with:
 ```bash
 pytest
 ```
+will check if the installation is working correctly.
 
 ## Usage
 ### Command line
@@ -139,7 +140,7 @@ Start a bash session in the container with:
 docker exec -it sudoku bash
 ```
 Once in the container, running `pytest` will check if the installation is working correctly.
-From here the program can be run as described above in [Command line](#command-line). `docker cp` can be used to copy new input or config files into the container, or a string can be passed as an argument as described above.
+From here the program can be run as described above in [Command line](#command-line). Docker commands such as `docker cp` can be used to copy new input or config files into the container, or a string can be passed as an argument as described above.
 
 
 ## Documentation
@@ -149,7 +150,7 @@ To build the documentation, from the root directory of the project run:
 sphinx-build -M html docs/source docs/build/
 ```
 The documentation can then be viewed by opening `docs/build/index.html` in a web browser.
-_Please note, the conda installation of Sphinx has a minor bug that displays a number of deprecated warnings on build. PLease ignore these, or use the pip installation._
+_Please note, the conda installation of Sphinx has a minor bug that displays a number of deprecated warnings on build. These can be ignored, or the pip installation can be used._
 ## Change log
 - v1.2:
   - Solve functionality is now contained in a child class of sudokuBoard
