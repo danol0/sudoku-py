@@ -1,0 +1,10 @@
+name: do382_sudoku
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - python=3.11.5
+  - numpy
+  - pytest
+  - Sphinx=7.2.6
+  - sphinx_rtd_theme=2.0.0

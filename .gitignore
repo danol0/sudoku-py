@@ -1,6 +1,8 @@
 report/*
 !report/figures
-!*.bib
+!report/*.tex
+!report/*.pdf
+!report/*.bib
 *.txt
 !requirements.txt
 *.ipynb

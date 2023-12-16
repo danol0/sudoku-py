@@ -14,11 +14,16 @@ This project is a lightweight python program for loading, solving and displaying
 - [Credits](#credits)
 
 ## Installation
-The program requires only numpy to run, with pytest used for testing and sphinx for documentation. These dependencies are included in `requirements.txt` and can be installed by running:
+The program requires only numpy to run, with pytest used for testing and sphinx for documentation. These dependencies are included in `environment.yml` and `requirements.txt` and can be installed with:
+```bash
+conda env create -f environment.yml
+```
+or
 ```bash
 pip install -r requirements.txt
 ```
-from the root directory. To run the unit tests, run:
+depending on your preferred package manager.
+To run the unit tests, run:
 ```bash
 pytest
 ```
@@ -127,7 +132,7 @@ docker build -t sudoku-py .
 ```
 The container can then be run with:
 ```bash
-docker run -d -t --name=sudoku sudoku-py
+docker run -dt --name=sudoku sudoku-py
 ```
 Start a bash session in the container with:
 ```bash
@@ -138,13 +143,13 @@ From here the program can be run as described above in [Command line](#command-l
 
 
 ## Documentation
-This project uses Sphinx for documentation, which is included in the requirements.txt.
+This project uses Sphinx for documentation, which is included in the requirements.
 To build the documentation, from the root directory of the project run:
 ```bash
 sphinx-build -M html docs/source docs/build/
 ```
 The documentation can then be viewed by opening `docs/build/index.html` in a web browser.
-
+_Please note, the conda installation of Sphinx has a minor bug that displays a number of deprecated warnings on build. PLease ignore these, or use the pip installation._
 ## Change log
 - v1.2:
   - Solve functionality is now contained in a child class of sudokuBoard
