@@ -1,7 +1,7 @@
-# sudoku-py: Solving Sudoku with Python
+# sudoku-py: A Python Package for Solving Sudoku Puzzles
 
 ## About
-This project is a lightweight python program for solving Sudoku puzzles. It using a combination of constraint propagation and brute-force search to find solutions, and can be run from the command line or imported as a package.
+This project is a lightweight python program for loading, solving and displaying Sudoku puzzles. It can be imported as a package or run directly from the command line, and uses a hybrid approach to find solutions.
 
 ## Contents
 
@@ -14,14 +14,20 @@ This project is a lightweight python program for solving Sudoku puzzles. It usin
 - [Credits](#credits)
 
 ## Installation
-The program requires only numpy to run, with pytest used for testing and sphinx for documentation. These dependencies are included in `requirements.txt` and can be installed by running:
+The program requires only numpy to run, with pytest used for testing and sphinx for documentation. These dependencies are included in `environment.yml` and `requirements.txt` and can be installed with:
+```bash
+conda env create -f environment.yml
+```
+or
 ```bash
 pip install -r requirements.txt
 ```
-from the root directory. To run the unit tests, run:
+depending on your preferred package manager.
+Running the unit tests with:
 ```bash
 pytest
 ```
+will check if the installation is working correctly.
 
 ## Usage
 ### Command line
@@ -29,11 +35,11 @@ The program can be run from the command line with:
 ```bash
 python src/main.py
 ```
-The puzzle specified by the `input_state` key in the `config.json` file will be loaded and solved, with the solution printed to the terminal.
+The puzzle specified by the `input_state` key in the `config.json` file in the root directory will be loaded and solved, with the solution printed to the terminal.
 
 Note that the `initial_state` key can be either a file path to a text file containing the puzzle, or a string representation of the puzzle itself. The program will attempt to load from a file first and revert to a string if this fails, notifying the user if this is the case.
 
-A puzzle can also be passed as a command line argument, in which case the `input_state` in the config file will be ignored. As before, this argument can be either a file path:
+A puzzle can also be passed as a command line argument which will overwrite the `input_state` in the config file. As before, this argument can be either a file path:
 ```bash
 python src/main.py input.txt
 ```
@@ -114,8 +120,11 @@ Backtracking is guaranteed to find a solution if there is one, given sufficient 
 - Wide range of allowed puzzle formats
 - Detailed puzzle validation that provides relevant feedback for invalid puzzles
 - Customizable solver options
-- Ability to save solutions to file
+- Detection of unsolvable puzzles or those with multiple solutions
 - Robust and helpful error messages
+- Ability to save solutions to file
+- Easy to use as a package or from the command line
+- Detailed HTML documentation
 
 ## Docker
 This project can be run in a Docker container. To build the container, from the root directory of the project run:
@@ -124,24 +133,24 @@ docker build -t sudoku-py .
 ```
 The container can then be run with:
 ```bash
-docker run -d -t --name=sudoku sudoku-py
+docker run -dt --name=sudoku sudoku-py
 ```
 Start a bash session in the container with:
 ```bash
 docker exec -it sudoku bash
 ```
 Once in the container, running `pytest` will check if the installation is working correctly.
-From here the program can be run as described above in [Command line](#command-line) - either passing the input as a string or by first copying an input file into the container with `docker cp`.
+From here the program can be run as described above in [Command line](#command-line). Docker commands such as `docker cp` can be used to copy new input or config files into the container, or a string can be passed as an argument as described above.
 
 
 ## Documentation
-This project uses Sphinx for documentation, which is included in the requirements.txt.
+This project uses Sphinx for documentation, which is included in the requirements.
 To build the documentation, from the root directory of the project run:
 ```bash
 sphinx-build -M html docs/source docs/build/
 ```
 The documentation can then be viewed by opening `docs/build/index.html` in a web browser.
-
+_Please note, the conda installation of Sphinx has a minor bug that displays a number of deprecated warnings on build. These can be ignored, or the pip installation can be used._
 ## Change log
 - v1.2:
   - Solve functionality is now contained in a child class of sudokuBoard

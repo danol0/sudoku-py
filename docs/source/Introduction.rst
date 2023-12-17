@@ -1,13 +1,13 @@
-sudoku-py: Solving Sudoku with Python
-=====================================
+sudoku-py: A Python Package for Solving Sudoku Puzzles
+======================================================
 
 About
 -----
 
-This project is a lightweight python program for solving Sudoku puzzles.
-It using a combination of constraint propagation and brute-force search
-to find solutions, and can be run from the command line or imported as a
-package.
+This project is a lightweight python program for loading, solving and
+displaying Sudoku puzzles. It can be imported as a package or run
+directly from the command line, and uses a hybrid approach to find
+solutions.
 
 Contents
 --------
@@ -50,16 +50,16 @@ The program can be run from the command line with:
    python src/main.py
 
 The puzzle specified by the ``input_state`` key in the ``config.json``
-file will be loaded and solved, with the solution printed to the
-terminal.
+file in the root directory will be loaded and solved, with the solution
+printed to the terminal.
 
 Note that the ``initial_state`` key can be either a file path to a text
 file containing the puzzle, or a string representation of the puzzle
 itself. The program will attempt to load from a file first and revert to
 a string if this fails, notifying the user if this is the case.
 
-A puzzle can also be passed as a command line argument, in which case
-the ``input_state`` in the config file will be ignored. As before, this
+A puzzle can also be passed as a command line argument which will
+overwrite the ``input_state`` in the config file. As before, this
 argument can be either a file path:
 
 .. code:: bash
@@ -177,8 +177,11 @@ Other Features
 -  Detailed puzzle validation that provides relevant feedback for
    invalid puzzles
 -  Customizable solver options
--  Ability to save solutions to file
+-  Detection of unsolvable puzzles or those with multiple solutions
 -  Robust and helpful error messages
+-  Ability to save solutions to file
+-  Easy to use as a package or from the command line
+-  Detailed HTML documentation
 
 Docker
 ------
@@ -204,9 +207,9 @@ Start a bash session in the container with:
 
 Once in the container, running ``pytest`` will check if the installation
 is working correctly. From here the program can be run as described
-above in `Command line <#command-line>`__ - either passing the input as
-a string or by first copying an input file into the container with
-``docker cp``.
+above in `Command line <#command-line>`__. ``docker cp`` can be used to
+copy new input or config files into the container, or a string can be
+passed as an argument as described above.
 
 Documentation
 -------------

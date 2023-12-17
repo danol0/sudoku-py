@@ -2,7 +2,40 @@ from src.sudoku.board import sudokuBoard
 import numpy as np
 import pytest
 
-# This file contains test cases for the sudokuBoard class
+
+# ---------------------------------- Validation -----------------------------------
+
+
+def test_contradiction():
+    """
+    Test case to check that initializing boards with a contradiction raises an error.
+    """
+    contradiction_complete = "594167832618239574237458169981726345375841296426395781762584913143972658859613472"
+    box_duplicate = "..9.7...5..21..9..1...28....7...5..1..851.....5....3.......3..68........21.....87"
+    column_duplicate = "6.159.....9..1............4.7.314..6.24.....5..3....1...6.....3...9.2.4......16.."
+    row_duplicate = ".4.1..35.............2.5......4.89..26.....12.5.3....7..4...16.6....7....1..8..2."
+    warning_puzzles = [
+        contradiction_complete,
+        box_duplicate,
+        column_duplicate,
+        row_duplicate,
+    ]
+    for puzzle in warning_puzzles:
+        with pytest.raises(ValueError):
+            sudokuBoard(puzzle)
+
+
+def test_insufficient_clues():
+    """
+    Test function to verify that a warning is raised for puzzles with insufficient clues
+    """
+    empty_board = "................................................................................."
+    single_clues = "........................................1........................................"
+    insufficient_clues = "...........5....9...4....1.2....3.5....7.....438...2......9.....1.4...6.........."
+    warning_puzzles = [empty_board, single_clues, insufficient_clues]
+    for puzzle in warning_puzzles:
+        with pytest.warns(UserWarning):
+            sudokuBoard(puzzle)
 
 
 # ------------------------------- Initialization ---------------------------------
@@ -10,7 +43,7 @@ import pytest
 
 def test_board_init_with_np_array():
     """
-    Test case to check that the board is initialized correctly with a numpy array.
+    Test case to check that the board is initialised correctly with a numpy array.
     """
     initial_state = np.array(
         [
@@ -31,7 +64,7 @@ def test_board_init_with_np_array():
 
 def test_board_init_with_list():
     """
-    Test case to check that the board is initialized correctly with a list.
+    Test case to check that the board is initialised correctly with a list.
     """
     initial_state = [
         [0, 0, 0, 0, 0, 7, 0, 0, 0],
@@ -56,7 +89,17 @@ def test_board_init_with_string():
     input_formats = [
         "..2.3...8.....8....31.2.....6..5.27..1.....5.2.4.6..31....8.6.5.......13..531.4..",
         "002030008000008000031020000060050270010000050204060031000080605000000013005310400",
-        "002|030|008\n000|008|000\n031|020|000\n---+---+---\n060|050|270\n010|000|050\n204|060|031\n---+---+---\n000|080|605\n000|000|013\n005|310|400",
+        "002|030|008\n"
+        "000|008|000\n"
+        "031|020|000\n"
+        "---+---+---\n"
+        "060|050|270\n"
+        "010|000|050\n"
+        "204|060|031\n"
+        "---+---+---\n"
+        "000|080|605\n"
+        "000|000|013\n"
+        "005|310|400",
     ]
 
     for input in input_formats:
@@ -78,6 +121,7 @@ def test_board_init_with_string():
         )
 
 
+# Using pytest fixtures to test loading from file
 @pytest.fixture
 def complete_initial_state(tmp_path):
     """
@@ -115,16 +159,17 @@ def test_board_init_invalid_type():
     """
     Test cases to check that a type error is raised when the initial state is invalid.
     """
-    with pytest.raises(TypeError):
-        sudokuBoard(1)
-        sudokuBoard(1.0)
-        sudokuBoard(True)
-        sudokuBoard((1, 2, 3))
-        sudokuBoard()
-        sudokuBoard([1, 2, 3])
-        sudokuBoard(np.array([1, 2, 3]))
-        sudokuBoard(np.zeros((9, 9), dtype=float))
-        sudokuBoard(None)
+    for initial_state in [
+        1,
+        1.0,
+        True,
+        (1, 2, 3),
+        None,
+        [1, 2, 3],
+        np.array([1, 2, 3]),
+    ]:
+        with pytest.raises(ValueError):
+            sudokuBoard(initial_state)
 
 
 def test_board_init_invalid_shape():
@@ -179,10 +224,9 @@ def test_board_init_invalid_string():
     """
     Test cases to check that a value error is raised when the initial state is not a valid string.
     """
-    with pytest.raises(ValueError):
-        sudokuBoard("invalid")
-        sudokuBoard("123445689")
-        sudokuBoard("does_not_exist.txt")
+    for initial_state in ["invalid", "123445689", "does_not_exist.txt"]:
+        with pytest.raises(ValueError):
+            sudokuBoard(initial_state)
 
 
 def test_board_init_invalid_values():
@@ -191,7 +235,7 @@ def test_board_init_invalid_values():
     """
     initial_state_array = np.array(
         [
-            [0, 0, 0, 0, 0, 7, 0, 0, 0],
+            [-1, 0, 0, 0, 0, 7, 0, 0, 0],
             [0, 0, 0, 0, 0, 9, 5, 0, 4],
             [0, 0, 0, 0, 5, 0, 1, 6, 9],
             [0, 8, 0, 0, 0, 0, 3, 0, 5],
@@ -203,7 +247,7 @@ def test_board_init_invalid_values():
         ]
     )
     initial_state_list = [
-        [0, 0, 0, 0, 0, 7, 0, 0, 0],
+        [-1, 0, 0, 0, 0, 7, 0, 0, 0],
         [0, 0, 0, 0, 0, 9, 5, 0, 4],
         [0, 0, 0, 0, 5, 0, 1, 6, 9],
         [0, 8, 0, 0, 0, 0, 3, 0, 5],
@@ -213,21 +257,12 @@ def test_board_init_invalid_values():
         [1, 0, 3, 9, 0, 0, 0, 0, 0],
         [0, 0, 0, 6, 0, 0, 0, 0, 10],
     ]
-    with pytest.raises(ValueError):
-        sudokuBoard(initial_state_array)
-        sudokuBoard(initial_state_list)
+    for initial_state in [initial_state_array, initial_state_list]:
+        with pytest.raises(ValueError):
+            sudokuBoard(initial_state)
 
 
 # ------------------------------- Constraints ---------------------------------
-
-
-def test_contradiction():
-    """
-    Test case to check that initializing a completed board with a contradiction raises an error.
-    """
-    contradiction = "594167832618239574237458169981726345375841296426395781762584913143972658859613472"
-    with pytest.raises(ValueError):
-        sudokuBoard(contradiction)
 
 
 def test_board_possible_values():
@@ -272,6 +307,20 @@ def test_related_cells():
     # should raise multiple solutions warning
     with pytest.warns(UserWarning):
         board = sudokuBoard(grid)
-    assert board.related_cells(grid, (0, 4)) == {0, 1, 2, 3, 4, 6, 7, 8, 9}
-    assert board.related_cells(grid, (4, 0)) == {0, 1}
-    assert board.related_cells(grid, (2, 4)) == {0, 4, 5, 6}
+    assert board.related_cells((0, 4)) == {1, 2, 3, 4, 5, 6, 7, 8, 9}
+    assert board.related_cells((0, 4), exclude_index=True) == {1, 2, 3, 4, 6, 7, 8, 9}
+    assert board.related_cells((4, 4)) == {5}
+    assert board.related_cells((4, 0)) == {1}
+    assert board.related_cells((2, 4)) == {4, 5, 6}
+
+
+def test_board_validate_no_contradictions():
+    """
+    Test case to check that the validate method returns True when there are no contradictions in the board.
+    """
+    solved = "974236158638591742125487936316754289742918563589362417867125394253649871491873625"
+    valid = "974236158630591700000480936316754289742918563589302417867125394250649871491873625"
+    board = sudokuBoard(solved)
+    assert board.validate()
+    board = sudokuBoard(valid)
+    assert board.validate()
