@@ -84,9 +84,8 @@ class sudokuSolver(sudokuBoard):
         max_solve_time: int | float = 60,
     ) -> None:
         """
-        Initializes the sudokuSolver object using of the input validation of the parent class.
+        Initialises the sudokuSolver object using of the input validation of the parent class.
         """
-
         super().__init__(initial_state)
 
         # Check that the strategy and max_solve_time are valid
@@ -100,6 +99,8 @@ class sudokuSolver(sudokuBoard):
 
         self.strategy = strategy
         self.max_solve_time = max_solve_time
+
+        # The start time is set when the solve method is called
         self.start = None
 
     def propagate_constraints(self) -> bool:
@@ -116,7 +117,7 @@ class sudokuSolver(sudokuBoard):
         solved : bool
             True if the board is complete, False otherwise.
         """
-        # If board is full, or max time exceeded, return
+        # If board is full or max time exceeded, return
         if np.all(self.state):
             return True
 
@@ -186,9 +187,9 @@ class sudokuSolver(sudokuBoard):
         ValueError
             If no solutions exist for the puzzle. The search time is included in the error message.
         """
-        # Check if the board is already solved
+        # Check if the board is already solved (checks for board validity are done in the parent class)
         if np.all(self.state):
-            print("The board is already solved.")
+            print("The puzzle is already solved.")
             return True
 
         # Start the timer

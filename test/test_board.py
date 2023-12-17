@@ -2,8 +2,6 @@ from src.sudoku.board import sudokuBoard
 import numpy as np
 import pytest
 
-# This file contains test cases for the sudokuBoard class
-
 
 # ---------------------------------- Validation -----------------------------------
 
@@ -45,7 +43,7 @@ def test_insufficient_clues():
 
 def test_board_init_with_np_array():
     """
-    Test case to check that the board is initialized correctly with a numpy array.
+    Test case to check that the board is initialised correctly with a numpy array.
     """
     initial_state = np.array(
         [
@@ -66,7 +64,7 @@ def test_board_init_with_np_array():
 
 def test_board_init_with_list():
     """
-    Test case to check that the board is initialized correctly with a list.
+    Test case to check that the board is initialised correctly with a list.
     """
     initial_state = [
         [0, 0, 0, 0, 0, 7, 0, 0, 0],

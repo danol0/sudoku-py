@@ -1,4 +1,4 @@
-# import submodules for package
+# Import submodules for package
 from . import board
 from . import solver
 
@@ -17,14 +17,14 @@ Examples
 --------
 >>> import sudoku
 
-# initialize board object
+# Initialise board object
 >>> board = sudoku.solver.sudokuSolver("input.txt")
 
-# solve the puzzle
+# Solve the puzzle
 >>> board.solve()
 The puzzle was solved by constraint propagation in 0.0045 seconds.
 
-# display the solved puzzle
+# Display the solved puzzle
 >>> print(board)
 483|921|657
 967|345|821
@@ -38,6 +38,6 @@ The puzzle was solved by constraint propagation in 0.0045 seconds.
 614|253|789
 895|417|362
 
-# save the solved puzzle to a file
+# Save the solved puzzle to a file
 >>> board.save("solution.txt")
 """

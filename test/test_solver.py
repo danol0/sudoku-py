@@ -2,17 +2,15 @@ from src.sudoku.solver import sudokuSolver
 import numpy as np
 import pytest
 
-# This file contains test cases for the sudokuSolver class.
-
 # Test cases adapted from http://sudopedia.enjoysudoku.com/Test_Cases.html
-
 
 # ------------------------------ Test cases for solve ------------------------------
 
 
-def test_insufficient_clues():
+def test_solve_insufficient_clues():
     """
-    Test function to verify that a solution is found for a puzzle with insufficient clues.
+    Test function to verify that a warning is raised, but a solution is found for a
+    puzzle with insufficient clues.
     """
     empty_board = "................................................................................."
     single_clues = "........................................1........................................"
@@ -26,7 +24,7 @@ def test_insufficient_clues():
 
 def test_no_solution():
     """
-    Test case to check  board with no solution raise an error when attempting to solve.
+    Test case to check that puzzles with no solution raise an error when attempting to solve.
     """
     invalid_square = "..9.287..8.6..4..5..3.....46.........2.71345.........23.....5..9..4..8.7..125.3.."
     invalid_box = ".9.3....1....8..46......8..4.5.6..3...32756...6..1.9.4..1......58..2....2....7.6."
@@ -107,7 +105,7 @@ valid = (
 
 def test_solver_init_valid_strategy():
     """
-    Test case to verify that the solver initializes with a valid strategy.
+    Test case to verify that the solver initialises with a valid strategy.
     """
     initial_state = valid
     strategy = "auto"
@@ -129,7 +127,7 @@ def test_solver_init_invalid_strategy():
 
 def test_solver_init_valid_max_solve_time():
     """
-    Test case to verify that the solver initializes with a valid max_solve_time.
+    Test case to verify that the solver initialises with a valid max_solve_time.
     """
     initial_state = valid
     strategy = "auto"

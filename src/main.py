@@ -37,7 +37,7 @@ def load_config():
 
 def main():
     """
-    Main entry point of the script. Loads the config, initializes the solver, and solves the puzzle.
+    Main entry point of the script. Loads the config, initialises the solver, and solves the puzzle.
     """
     # Load the configuration
     config = load_config()
@@ -55,7 +55,7 @@ def main():
         initial_state = config["initial_state"]
         print("Loading puzzle from config file...")
 
-    # Initialize the solver
+    # Initialise the solver
     board = sudokuSolver(
         initial_state,
         strategy=config["strategy"],

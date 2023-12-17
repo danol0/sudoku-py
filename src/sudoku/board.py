@@ -5,7 +5,7 @@ import os
 
 class sudokuBoard:
     """
-    General class for representing a Sudoku board with methods for initializing, printing and saving.
+    General class for representing a Sudoku board with methods for initialising, printing and saving.
 
     Parameters
     ----------
@@ -23,6 +23,23 @@ class sudokuBoard:
     indices : list[tuple[int, int]]
         The indices of each cell.
 
+    Methods
+    -------
+    load_initial_state(input)
+        Load the initial state of a puzzle to a 9x9 array from a file or a string.
+
+    update_possible_values()
+        Updates the possible values attribute given the current state of the board.
+
+    related_cells(index, exclude_index=False)
+        Returns the contents of all filled cells that are related to the specified index.
+
+    validate()
+        Checks if the board contains any contradictions.
+
+    save(filepath)
+        Saves the current state of the board to a file.
+
     Raises
     ------
     ValueError :
@@ -31,7 +48,7 @@ class sudokuBoard:
     Returns
     -------
     self : object
-        Initialized SudokuBoard object.
+        Initialised SudokuBoard object.
 
     See Also
     --------
@@ -50,7 +67,7 @@ class sudokuBoard:
     >>> board = sudokuBoard("365427819487931526129856374852793641613248957974165283241389765538674192796512438")
     Loading initial state from string.
 
-    Initialize directly with an array:
+    Initialise directly with an array:
 
     >>> initial_state = [
         [3, 6, 5, 4, 2, 7, 8, 1, 9],
@@ -103,7 +120,7 @@ class sudokuBoard:
 
     def __init__(self, initial_state: str | np.ndarray | list[list[int]]) -> None:
         """
-        Initializes the board object from the specified initial state. Loads directly from arrays and lists,
+        Initialises the board object from the specified initial state. Loads directly from arrays and lists,
         or uses the load_initial_state method to parse strings and file paths.
         """
         # Use load_initial_state method to parse input if given as a string or file path
@@ -125,12 +142,12 @@ class sudokuBoard:
         if np.count_nonzero(initial_state) < 17:
             warnings.warn("WARNING: The puzzle has multiple solutions.")
 
-        # Initialize indices and state attributes and check for contradictions
+        # Initialise indices and state attributes and check for contradictions
         self.indices = [(i, j) for i in range(9) for j in range(9)]
         self.state = initial_state
         self.validate()
 
-        # Initialize possible values attribute and update
+        # Initialise possible values attribute and update
         values = np.array([set(range(1, 10)) for _ in range(81)])
         self.possible_values = values.reshape((9, 9))
         self.update_possible_values()
@@ -195,7 +212,7 @@ class sudokuBoard:
             if char.isdigit() or char == "."
         ]
 
-        # Validate the board
+        # Validate the board length
         if len(board) != 81:
             if from_file:
                 raise ValueError(
@@ -210,7 +227,7 @@ class sudokuBoard:
 
         return board
 
-    def update_possible_values(self) -> None:
+    def update_possible_values(self) -> bool:
         """
         Updates the possible values attribute given the current state of the board.
 
@@ -234,12 +251,11 @@ class sudokuBoard:
                         f"This puzzle is invalid as the cell in row {index[0]+1} and column {index[1]+1} "
                         "has no possible values."
                     )
-
         return True
 
     def related_cells(self, index: tuple, exclude_index: bool = False) -> set:
         """
-        Returns the contents of all cells in the given grid that are related to the specified index.
+        Returns the contents of all filled cells that are related to the specified index.
 
         Note
         ----
@@ -267,12 +283,14 @@ class sudokuBoard:
         box_row = row // 3 * 3
         box_col = col // 3 * 3
 
+        # Copy the grid and mask index cell if exclude_index is True
         if exclude_index:
             grid = np.copy(self.state)
             grid[index] = 0
         else:
             grid = self.state
 
+        # Get the values in the same row, column, and box as the index cell
         related = {
             *grid[row, :],
             *grid[:, col],
