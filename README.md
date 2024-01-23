@@ -1,4 +1,4 @@
-# sudoku-py: A Python Package for Solving Sudoku Puzzles
+# A Python Package for Solving Sudoku Puzzles
 
 ## About
 This project is a lightweight python program for loading, solving and displaying Sudoku puzzles. It can be imported as a package or run directly from the command line, and uses a hybrid approach to find solutions.
@@ -10,8 +10,6 @@ This project is a lightweight python program for loading, solving and displaying
 - [Features](#features)
 - [Docker](#docker)
 - [Documentation](#documentation)
-- [Change log](#change-log)
-- [Credits](#credits)
 
 ## Installation
 The program requires only numpy to run, with pytest used for testing and sphinx for documentation. These dependencies are included in `environment.yml` and `requirements.txt` and can be installed with:
@@ -123,7 +121,6 @@ Backtracking is guaranteed to find a solution if there is one, given sufficient 
 - Detection of unsolvable puzzles or those with multiple solutions
 - Robust and helpful error messages
 - Ability to save solutions to file
-- Easy to use as a package or from the command line
 - Detailed HTML documentation
 
 ## Docker
@@ -150,21 +147,3 @@ To build the documentation, from the root directory of the project run:
 sphinx-build -M html docs/source docs/build/
 ```
 The documentation can then be viewed by opening `docs/build/index.html` in a web browser.
-_Please note, the conda installation of Sphinx has a minor bug that displays a number of deprecated warnings on build. These can be ignored, or the pip installation can be used._
-## Change log
-- v1.2:
-  - Solve functionality is now contained in a child class of sudokuBoard
-  - Updated main.py to use config file
-  - Custom solver options can now be specified in config file or on object initialization
-
-- v1.1:
-  - Improved backtracking search logic
-  - Added ability to pass input as a string
-  - Updated dockerfile to not run & exit on launch
-
-- v1.0:
-  - Initial release
-  - Added constraint propagation and backtracking search
-
-## Credits
-This project was written by Daniel Owen-Lloyd, using [widely known techniques](https://en.wikipedia.org/wiki/Sudoku_solving_algorithms) for solving Sudoku puzzles.
