@@ -1,4 +1,4 @@
-name: do382_sudoku
+name: sudoku_py
 channels:
   - defaults
   - conda-forge
